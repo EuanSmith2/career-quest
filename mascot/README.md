@@ -1,6 +1,8 @@
 # Byte mascot
 
 One React component, no image files. All 13 moods are the same vector rig in a different configuration.
+The body, face, eyes, beak, feet and flippers are measured from the front pose of `src/sheet.jpg`
+(silhouette overlap 95.4%), so the rig is a 1:1 of the original design; the poses and props are new.
 
 ```tsx
 <Byte mood="correct" size={160} />
