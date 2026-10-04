@@ -22,6 +22,7 @@ The body, face, eyes, beak, feet and flippers are measured from the front pose o
 | Face (blink, glance, talk) | idle, talking, stare, smug, shocked, sad, locked-in |
 | Body | correct, wrong, level-up, coding, out-of-hearts, chest, wave, thinking |
 
+- Flippers are one fixed shape and size in every pose (as Duolingo keeps Duo's wings); a pose only sets their angle.
 - A pose is arm angles + a face (eyelid drop/tilt, pupil offset/scale, beak) + props (sparkles, heart, smoke,
   laptop, chest, tears, broken heart, hood brim). Add a mood by adding one entry to `POSES`.
 - Switching moods swings the arms and re-forms the face, with a small squash on every change.
@@ -52,6 +53,7 @@ Vowels open wide, o/u narrow the beak, e/i widen it, m/b/p close it, punctuation
 ## Motion craft
 - **Anticipation:** reactions crouch before they hop; the floor shadow swells, then shrinks in the air.
 - **Secondary motion:** drawstrings sway when calm and swing after a jolt.
+- **Attitude:** each mood holds a whole-body lean (sad slumps, shocked stretches, smug leans back, thinking tilts).
 - **Idle life:** blink every 3–6 s, glance, nod or tilt every 7–12 s, breathing.
 - **Transitions:** arms swing on springs between poses; props pop or rise in; every change gets a small squash.
 

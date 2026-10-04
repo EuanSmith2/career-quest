@@ -45,7 +45,7 @@ const C = {
   white: "#FFFFFF", beak: "#FFB31F", beakLow: "#F89413", green: "#75DA31",
   zip: "#8B8E96", tongue: "#FA779B", tear: "#71C4F9", yellow: "#FBBA1A", blue: "#71C4F9",
   smoke: "#8B8E96", heartGrey: "#AFB3BF", laptop: "#53575E", laptopEdge: "#8B8E96",
-  wood: "#D9822B", woodShade: "#B4651C", gold: "#FFC800", glow: "#FFE7A3",
+  blush: "#FF9DB6", wood: "#D9822B", woodShade: "#B4651C", gold: "#FFC800", glow: "#FFE7A3",
 };
 
 /* ================================================================ poses */
@@ -60,39 +60,61 @@ type Face = {
   pupil: number;    // pupil scale
   jaw: number;      // beak open amount
   happy?: boolean;  // closed ∩ eyes
+  blush?: boolean;  // pink cheeks (pleased, proud, excited)
+  glossy?: boolean; // big watery highlights (sad)
 };
-type Arm = { a: number; len: number; front?: boolean; dy?: number };
+// Every flipper is the same shape and size in every pose (as Duolingo keeps Duo's wings): a pose only
+// sets the angle, whether it sits in front of the body, and a small pivot nudge for reaching across.
+type Arm = { a: number; front?: boolean; dx?: number; dy?: number };
+const ARM_LEN = 46;
 type Prop = "sparkles" | "heart" | "smoke" | "laptop" | "chest" | "glow" | "tears" | "tear" | "broken-heart" | "brim" | "dots";
 type Pose = { face: Face; arms: [Arm, Arm]; props?: Prop[] };
 
 const F = (o: Partial<Face> = {}): Face => ({ lid: 0, tilt: 0, lower: 0, center: false, look: 0, lift: 0, pupil: 1, jaw: 0, ...o });
 // Arm angle a: 0 = straight out sideways, + raises, − lowers, ~180–240 = across the front.
-const DOWN: [Arm, Arm] = [{ a: -44, len: 40 }, { a: -44, len: 40 }];
+const DOWN: [Arm, Arm] = [{ a: -44 }, { a: -44 }];
 
 const POSES: Record<ByteMood, Pose> = {
   idle:      { face: F(), arms: DOWN },
-  talking:   { face: F(), arms: [{ a: -36, len: 40 }, { a: -44, len: 40 }] },
-  stare:     { face: F({ center: true, pupil: 0.55 }), arms: [{ a: -50, len: 40 }, { a: -50, len: 40 }] },
-  smug:      { face: F({ lid: 24, look: 6, lift: 3, pupil: 0.95 }), arms: DOWN },
-  shocked:   { face: F({ center: true, pupil: 0.5, jaw: 15 }), arms: [{ a: 14, len: 48 }, { a: 14, len: 48 }] },
-  sad:       { face: F({ lid: 14, tilt: -16, lower: 9, lift: 6, pupil: 0.9 }), arms: [{ a: -60, len: 38 }, { a: -60, len: 38 }], props: ["tears"] },
-  "locked-in": { face: F({ lid: 22, tilt: 12, lower: 12, center: true, pupil: 0.8 }), arms: [{ a: -54, len: 40 }, { a: -54, len: 40 }], props: ["glow"] },
-  correct:   { face: F({ lift: -3, jaw: 11 }), arms: [{ a: 60, len: 60 }, { a: 60, len: 60 }], props: ["sparkles"] },
+  talking:   { face: F(), arms: [{ a: -34 }, { a: -44 }] },
+  stare:     { face: F({ center: true, pupil: 0.55 }), arms: [{ a: -54 }, { a: -54 }] },
+  smug:      { face: F({ lid: 24, look: 6, lift: 3, pupil: 0.95 }), arms: [{ a: -26 }, { a: -26 }] },
+  shocked:   { face: F({ center: true, pupil: 0.5, jaw: 15 }), arms: [{ a: 34 }, { a: 34 }] },
+  sad:       { face: F({ lid: 14, tilt: -16, lower: 9, lift: 6, pupil: 1.12, glossy: true }), arms: [{ a: -68 }, { a: -68 }], props: ["tears"] },
+  "locked-in": { face: F({ lid: 22, tilt: 12, lower: 12, center: true, pupil: 0.8 }), arms: [{ a: -58 }, { a: -58 }], props: ["glow"] },
+  correct:   { face: F({ lift: -3, jaw: 11, blush: true }), arms: [{ a: 64 }, { a: 64 }], props: ["sparkles"] },
   wrong:     { face: F({ lid: 20, tilt: 10, look: 7, pupil: 0.9 }),
-               arms: [{ a: 207, len: 64, front: true, dy: -2 }, { a: 163, len: 64, front: true, dy: 26 }], props: ["smoke"] },
-  "level-up": { face: F({ happy: true, jaw: 9 }), arms: [{ a: 18, len: 50 }, { a: 18, len: 50 }], props: ["sparkles", "heart"] },
+               arms: [{ a: 200, front: true, dx: 16, dy: 4 }, { a: 166, front: true, dx: 16, dy: 22 }], props: ["smoke"] },
+  "level-up": { face: F({ happy: true, jaw: 9, blush: true }), arms: [{ a: 28 }, { a: 28 }], props: ["sparkles", "heart"] },
   coding:    { face: F({ lid: 20, tilt: 8, lower: 10, center: true, lift: 4, pupil: 0.8 }),
-               arms: [{ a: 250, len: 44, front: true }, { a: 250, len: 44, front: true }], props: ["glow", "laptop"] },
-  "out-of-hearts": { face: F({ lid: 20, tilt: -12, lower: 6, lift: 8, pupil: 0.85 }),
-               arms: [{ a: -70, len: 38 }, { a: -70, len: 38 }], props: ["brim", "tear", "broken-heart"] },
-  // right flipper up; ByteRig swings it between 62° and 94° while waving
-  wave:      { face: F({ lift: -2, jaw: 7 }), arms: [{ a: -44, len: 40 }, { a: 78, len: 58 }] },
+               arms: [{ a: 250, front: true, dx: 8 }, { a: 250, front: true, dx: 8 }], props: ["glow", "laptop"] },
+  "out-of-hearts": { face: F({ lid: 20, tilt: -12, lower: 6, lift: 8, pupil: 1.05, glossy: true }),
+               arms: [{ a: -76 }, { a: -76 }], props: ["brim", "tear", "broken-heart"] },
+  // right flipper up; ByteRig swings it between 62° and 96° while waving
+  wave:      { face: F({ lift: -2, jaw: 7, blush: true }), arms: [{ a: -44 }, { a: 78 }] },
   // right flipper to the chin, eyes up and away, thought dots
   thinking:  { face: F({ lid: 8, look: -6, lift: -7, pupil: 0.9 }),
-               arms: [{ a: -44, len: 40 }, { a: 150, len: 55, front: true }], props: ["dots"] },
-  chest:     { face: F({ lift: -4, jaw: 9 }),
-               arms: [{ a: 242, len: 48, front: true }, { a: 242, len: 48, front: true }], props: ["chest"] },
+               arms: [{ a: -44 }, { a: 146, front: true, dx: 6 }], props: ["dots"] },
+  chest:     { face: F({ lift: -4, jaw: 9, blush: true }),
+               arms: [{ a: 244, front: true, dx: 4 }, { a: 244, front: true, dx: 4 }], props: ["chest"] },
 };
+
+// Whole-body attitude per mood (held, not looped): slump, stretch, lean, tilt. Duolingo poses act with
+// the whole body, not just the face.
+const LEAN: Partial<Record<ByteMood, TargetAndTransition>> = {
+  stare:     { scaleY: 1.02, scaleX: 0.99 },
+  smug:      { rotate: -5, y: -1 },
+  shocked:   { scaleY: 1.06, scaleX: 0.96, y: -2 },
+  sad:       { y: 4, scaleY: 0.95, scaleX: 1.03, rotate: 2 },
+  "locked-in": { y: 3, scaleY: 0.97, scaleX: 1.02 },
+  wrong:     { rotate: 3 },
+  coding:    { y: 2 },
+  "out-of-hearts": { y: 6, scaleY: 0.92, scaleX: 1.05 },
+  chest:     { rotate: -2 },
+  wave:      { rotate: -3 },
+  thinking:  { rotate: 5, x: -2 },
+};
+const UPRIGHT = { rotate: 0, x: 0, y: 0, scaleX: 1, scaleY: 1 };
 
 /* ================================================================ motion */
 
@@ -172,8 +194,12 @@ export function Byte({ mood = "idle", mouth, mouthShape, followPointer = false, 
         animate={reduce ? undefined : SHADOW[mood]}
       />
       <motion.div style={{ ...fill, originY: 0.9 }} animate={pop}>
+        <motion.div style={{ ...fill, originY: 0.9 }} initial={false}
+          animate={reduce ? UPRIGHT : { ...UPRIGHT, ...LEAN[mood] }}
+          transition={{ type: "spring", stiffness: 220, damping: 18 }}>
         <motion.div style={{ ...fill, originY: 0.9 }} animate={reduce ? undefined : BODY[mood]}>
           <ByteRig mood={mood} mouth={mouth} mouthShape={mouthShape} gaze={gaze} reduce={reduce} />
+        </motion.div>
         </motion.div>
       </motion.div>
     </div>
@@ -220,8 +246,8 @@ function useGaze(ref: { current: HTMLElement | null }, enabled: boolean) {
         const r = ref.current?.getBoundingClientRect();
         if (!r) return;
         const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height * 0.35);
-        const k = (v: number) => Math.max(-1, Math.min(1, v / 320));
-        setG({ x: k(dx) * 5, y: k(dy) * 4 });
+        const k = (v: number) => Math.max(-1, Math.min(1, v / 220));
+        setG({ x: k(dx) * 5.5, y: k(dy) * 4.5 });
       });
     };
     const reset = () => setG({ x: 0, y: 0 });
@@ -262,28 +288,31 @@ const EYE_Y = 58, EYE_W = 33.6, EYE_H = 44.8, EYE_RY = 20, EYE_CY = EYE_Y + EYE_
 // Shoulder + rest-pose flipper fitted to the sheet silhouette (IoU 0.954).
 const SHOULDER = { x: 44, y: 139 };
 const FACE_D = "M100.0 41.6 C103.7 41.6 107.0 41.6 111.2 42.5 C115.4 43.4 121.5 45.4 125.0 46.8 C128.5 48.2 130.2 49.7 132.3 51.1 C134.4 52.5 135.9 54.0 137.5 55.4 C139.1 56.8 140.7 58.3 141.8 59.7 C143.0 61.1 143.5 62.6 144.4 64.0 C145.3 65.4 146.3 66.8 147.0 68.3 C147.7 69.8 148.1 71.2 148.7 72.7 C149.3 74.2 150.0 75.6 150.4 77.0 C150.8 78.4 151.0 79.9 151.3 81.3 C151.6 82.7 152.0 83.4 152.2 85.6 C152.3 87.8 152.3 92.0 152.2 94.2 C152.1 96.4 152.1 97.1 151.7 98.5 C151.3 99.9 150.4 101.4 149.6 102.8 C148.8 104.2 148.3 105.7 147.0 107.1 C145.7 108.5 144.0 110.0 141.8 111.4 C139.6 112.9 137.0 114.3 134.0 115.8 C131.0 117.2 127.1 118.7 123.7 120.1 C120.3 121.5 116.5 123.0 113.8 124.4 C111.1 125.8 109.6 127.4 107.3 128.7 C105.0 130.0 102.4 132.0 100.0 132.0 C97.6 132.0 95.0 130.0 92.7 128.7 C90.4 127.4 88.9 125.8 86.2 124.4 C83.5 123.0 79.7 121.5 76.3 120.1 C72.9 118.7 69.0 117.2 66.0 115.8 C63.0 114.3 60.4 112.9 58.2 111.4 C56.0 110.0 54.3 108.5 53.0 107.1 C51.7 105.7 51.2 104.2 50.4 102.8 C49.6 101.4 48.7 99.9 48.3 98.5 C47.9 97.1 47.9 96.4 47.8 94.2 C47.7 92.0 47.6 87.8 47.8 85.6 C47.9 83.4 48.4 82.7 48.7 81.3 C49.0 79.9 49.2 78.4 49.6 77.0 C50.0 75.6 50.7 74.2 51.3 72.7 C51.9 71.2 52.3 69.8 53.0 68.3 C53.7 66.8 54.7 65.4 55.6 64.0 C56.5 62.6 57.1 61.1 58.2 59.7 C59.4 58.3 60.9 56.8 62.5 55.4 C64.1 54.0 65.6 52.5 67.7 51.1 C69.8 49.7 71.5 48.2 75.0 46.8 C78.5 45.4 84.6 43.4 88.8 42.5 C93.0 41.6 96.3 41.6 100.0 41.6 Z";
-const BODY_D = "M100.0 6.4 C101.8 6.4 103.8 6.6 105.4 6.9 C107.0 7.2 107.8 7.7 109.6 8.4 C111.4 9.1 114.2 10.2 116.0 11.0 C117.8 11.8 119.0 12.6 120.5 13.4 C122.0 14.2 123.4 15.2 124.7 16.0 C126.0 16.8 126.1 16.8 128.1 18.3 C130.1 19.8 134.1 22.9 136.5 25.0 C138.9 27.1 140.8 28.8 142.7 30.8 C144.6 32.8 146.4 34.9 148.0 36.9 C149.6 38.9 151.1 40.9 152.4 42.9 C153.7 44.9 154.9 46.9 156.0 48.9 C157.1 50.9 158.0 53.0 158.9 55.0 C159.8 57.0 160.5 59.0 161.2 61.0 C161.9 63.0 162.5 64.8 163.1 66.8 C163.7 68.8 164.1 70.9 164.6 72.9 C165.1 74.9 165.6 76.9 166.0 78.9 C166.4 80.9 166.7 82.9 166.9 84.9 C167.1 86.9 167.4 89.0 167.4 91.0 C167.4 93.0 167.4 95.0 167.2 97.0 C167.0 99.0 166.6 100.8 166.0 102.8 C165.4 104.8 164.5 106.5 163.9 109.0 C163.3 111.5 162.6 114.8 162.2 118.0 C161.8 121.2 161.8 124.0 161.6 128.0 C161.4 132.0 161.6 137.5 161.0 142.0 C160.4 146.5 159.3 151.2 158.0 155.0 C156.7 158.8 155.0 161.5 153.0 165.0 C151.0 168.5 148.3 172.8 146.0 176.0 C143.7 179.2 141.8 182.1 139.0 184.5 C136.2 186.9 133.0 188.9 129.0 190.5 C125.0 192.1 119.8 193.1 115.0 193.8 C110.2 194.5 105.0 194.5 100.0 194.5 C95.0 194.5 89.8 194.5 85.0 193.8 C80.2 193.1 75.0 192.1 71.0 190.5 C67.0 188.9 63.8 186.9 61.0 184.5 C58.2 182.1 56.3 179.2 54.0 176.0 C51.7 172.8 49.0 168.5 47.0 165.0 C45.0 161.5 43.3 158.8 42.0 155.0 C40.7 151.2 39.6 146.5 39.0 142.0 C38.4 137.5 38.6 132.0 38.4 128.0 C38.2 124.0 38.2 121.2 37.8 118.0 C37.4 114.8 36.7 111.5 36.1 109.0 C35.5 106.5 34.5 104.8 34.0 102.8 C33.5 100.8 33.0 99.0 32.8 97.0 C32.6 95.0 32.5 93.0 32.6 91.0 C32.6 89.0 32.9 86.9 33.1 84.9 C33.3 82.9 33.6 80.9 34.0 78.9 C34.4 76.9 34.9 74.9 35.4 72.9 C35.9 70.9 36.3 68.8 36.9 66.8 C37.5 64.8 38.1 63.0 38.8 61.0 C39.5 59.0 40.2 57.0 41.1 55.0 C42.0 53.0 42.9 50.9 44.0 48.9 C45.1 46.9 46.3 44.9 47.6 42.9 C48.9 40.9 50.4 38.9 52.0 36.9 C53.6 34.9 55.4 32.8 57.3 30.8 C59.2 28.8 61.1 27.1 63.5 25.0 C65.9 22.9 69.9 19.8 71.9 18.3 C73.9 16.8 74.0 16.8 75.3 16.0 C76.6 15.2 78.0 14.2 79.5 13.4 C81.0 12.6 82.2 11.8 84.0 11.0 C85.8 10.2 88.6 9.1 90.4 8.4 C92.2 7.7 93.0 7.2 94.6 6.9 C96.2 6.6 98.2 6.4 100.0 6.4 Z";
+const BODY_D = "M100.0 6.4 C104.0 6.4 108.8 7.0 112.1 7.5 C115.4 8.0 117.3 8.8 119.6 9.5 C121.9 10.2 123.8 11.1 125.8 12.0 C127.8 12.9 129.5 13.8 131.4 15.0 C133.3 16.2 135.2 17.5 137.1 19.0 C139.0 20.5 141.0 22.2 142.8 24.0 C144.7 25.8 146.5 27.8 148.2 30.0 C149.9 32.2 151.6 34.5 153.2 37.0 C154.8 39.5 156.2 42.2 157.6 45.0 C159.0 47.8 160.3 50.8 161.4 54.0 C162.5 57.2 163.5 60.5 164.3 64.0 C165.1 67.5 165.9 71.5 166.4 75.0 C166.9 78.5 167.1 82.2 167.3 85.0 C167.5 87.8 167.4 89.5 167.4 91.5 C167.4 93.5 167.4 95.1 167.2 97.0 C167.0 98.9 166.6 100.8 166.0 102.8 C165.4 104.8 164.5 106.5 163.9 109.0 C163.3 111.5 162.6 114.8 162.2 118.0 C161.8 121.2 161.8 124.0 161.6 128.0 C161.4 132.0 161.6 137.5 161.0 142.0 C160.4 146.5 159.3 151.2 158.0 155.0 C156.7 158.8 155.0 161.5 153.0 165.0 C151.0 168.5 148.3 172.8 146.0 176.0 C143.7 179.2 141.8 182.1 139.0 184.5 C136.2 186.9 133.0 188.9 129.0 190.5 C125.0 192.1 119.8 193.1 115.0 193.8 C110.2 194.5 105.0 194.5 100.0 194.5 C95.0 194.5 89.8 194.5 85.0 193.8 C80.2 193.1 75.0 192.1 71.0 190.5 C67.0 188.9 63.8 186.9 61.0 184.5 C58.2 182.1 56.3 179.2 54.0 176.0 C51.7 172.8 49.0 168.5 47.0 165.0 C45.0 161.5 43.3 158.8 42.0 155.0 C40.7 151.2 39.6 146.5 39.0 142.0 C38.4 137.5 38.6 132.0 38.4 128.0 C38.2 124.0 38.2 121.2 37.8 118.0 C37.4 114.8 36.7 111.5 36.1 109.0 C35.5 106.5 34.5 104.8 34.0 102.8 C33.5 100.8 33.0 98.9 32.8 97.0 C32.6 95.1 32.6 93.5 32.6 91.5 C32.6 89.5 32.5 87.8 32.7 85.0 C32.9 82.2 33.1 78.5 33.6 75.0 C34.1 71.5 34.9 67.5 35.7 64.0 C36.5 60.5 37.5 57.2 38.6 54.0 C39.7 50.8 41.0 47.8 42.4 45.0 C43.8 42.2 45.2 39.5 46.8 37.0 C48.4 34.5 50.1 32.2 51.8 30.0 C53.5 27.8 55.3 25.8 57.2 24.0 C59.0 22.2 61.0 20.5 62.9 19.0 C64.8 17.5 66.7 16.2 68.6 15.0 C70.5 13.8 72.2 12.9 74.2 12.0 C76.2 11.1 78.1 10.2 80.4 9.5 C82.7 8.8 84.6 8.0 87.9 7.5 C91.2 7.0 96.0 6.4 100.0 6.4 Z";
 const spring = { type: "spring" as const, stiffness: 300, damping: 22 };
 
-/** One sleeve, pivoting at the shoulder. The right arm is the left one mirrored. */
+/** One flipper, pivoting at the shoulder. Same shape and size in every pose; the right one is mirrored. */
 function Sleeve({ arm, right, still }: { arm: Arm; right?: boolean; still?: boolean }) {
-  const L = arm.len;
+  const L = ARM_LEN;
+  // tapered: root radius 13 (hidden at the shoulder), tip radius 17 (the rounded mitten end)
+  const d = `M14 -13 L${-L + 17} -17 A17 17 0 0 0 ${-L + 17} 17 L14 13 A13 13 0 0 0 14 -13 Z`;
+  const tip = `M${-L + 20} -16.7 A17 17 0 0 0 ${-L + 20} 16.7 Z`;
   const parts = (
     <>
-      {/* front sleeves cross the same-colour hoodie, so one flat shade shape underneath separates them */}
-      {arm.front && <rect x={-L} y={-11} width={L + 16} height={32} rx={16} fill={C.shade} />}
-      {/* the same charcoal over the hoodie would vanish, so front sleeves sit one step lighter */}
-      <rect x={-L} y={-16} width={L + 16} height={32} rx={16} fill={arm.front ? C.hoodFront : C.hood} />
-      {arm.front && <rect x={-L} y={-16} width={18} height={32} rx={9} fill={C.faceShade} />}
+      {/* front flippers cross the same-colour hoodie, so one flat shade shape underneath separates them */}
+      {arm.front && <path d={d} transform="translate(0 5)" fill={C.shade} />}
+      {/* the same charcoal over the hoodie would vanish, so front flippers sit one step lighter */}
+      <path d={d} fill={arm.front ? C.hoodFront : C.hood} />
+      {arm.front && <path d={tip} fill={C.faceShade} />}
     </>
   );
   return (
     <g transform={right ? "translate(200 0) scale(-1 1)" : undefined}>
-      <g transform={`translate(${SHOULDER.x} ${SHOULDER.y + (arm.dy ?? 0)})`}>
-        {/* the rotating group's bbox is the sleeve rect, so its pivot (local 0,0) sits at L/(L+16) */}
+      <g transform={`translate(${SHOULDER.x + (arm.dx ?? 0)} ${SHOULDER.y + (arm.dy ?? 0)})`}>
+        {/* the rotating group's bbox runs x −L…27, so its pivot (local 0,0) sits at L/(L+27) */}
         {still ? <g transform={`rotate(${arm.a})`}>{parts}</g> : (
           <motion.g initial={false} animate={{ rotate: arm.a }} transition={spring}
-            style={{ originX: L / (L + 16), originY: 0.5 }}>{parts}</motion.g>
+            style={{ originX: L / (L + 27), originY: 0.5 }}>{parts}</motion.g>
         )}
       </g>
     </g>
@@ -348,11 +377,13 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
   // mouth layer wins over the mood's own beak; otherwise the talking flap, otherwise the pose
   const jawDrop = mouth !== undefined ? Math.max(0, Math.min(1, mouth)) * 10 : flap ? 7 : f.jaw;
   const quick = { duration: 0.1, ease: "easeOut" as const };
+  // tracking the pointer wants a much snappier spring than mood changes do
+  const eyeSpring = gaze && (gaze.x || gaze.y) ? { type: "spring" as const, stiffness: 900, damping: 42 } : spring;
   // viseme width: o/u narrow the beak, e/i widen it (only while the mouth layer is driving)
   const beakW = mouth !== undefined && mouthShape === "round" ? 0.82 : mouth !== undefined && mouthShape === "wide" ? 1.12 : 1;
   const waving = useWave(mood === "wave" && !reduce && !still);
   const [left, rightPose] = pose.arms;
-  const right = mood === "wave" ? { ...rightPose, a: waving ? 94 : 62 } : rightPose;
+  const right = mood === "wave" ? { ...rightPose, a: waving ? 96 : 62 } : rightPose;
   // prop entrances are for live use; exported stills must show everything at frame 0
   const popIn = still ? undefined : "byte-pop";
   const riseIn = still ? undefined : "byte-rise";
@@ -371,8 +402,8 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
       {/* props behind him */}
       {has("smoke") && (
         <g className={popIn}><g className="byte-smoke" fill={C.smoke}>
-          <circle cx={150} cy={14} r={13} /><circle cx={166} cy={4} r={12} /><circle cx={174} cy={20} r={11} />
-          <circle cx={160} cy={24} r={10} /><circle cx={140} cy={34} r={5} />
+          <circle cx={160} cy={8} r={13} /><circle cx={176} cy={-2} r={12} /><circle cx={184} cy={14} r={11} />
+          <circle cx={170} cy={18} r={10} /><circle cx={154} cy={26} r={5} />
         </g></g>
       )}
 
@@ -392,6 +423,11 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
         <ellipse cx={73.3} cy={103} rx={15.5} ry={8.6} />
         <ellipse cx={126.7} cy={103} rx={15.5} ry={8.6} />
       </g>
+      {f.blush && (
+        <g fill={C.blush} className={still ? undefined : "byte-pop"}>
+          <ellipse cx={64} cy={109} rx={9} ry={4.6} /><ellipse cx={136} cy={109} rx={9} ry={4.6} />
+        </g>
+      )}
 
       {/* screen light on the lower face */}
       {has("glow") && (
@@ -416,7 +452,8 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
                     <>
                       <g transform={`translate(${px} ${py}) translate(${e.cx} ${EYE_CY}) scale(${f.pupil}) translate(${-e.cx} ${-EYE_CY})`}>
                         <rect x={e.cx - 7.35} y={EYE_CY - 12} width={14.7} height={24} rx={7.35} fill={C.shade} />
-                        <circle cx={e.cx - 2.2} cy={EYE_CY - 6.5} r={2.6} fill={C.white} />
+                        <circle cx={e.cx - 2.2} cy={EYE_CY - 6.5} r={f.glossy ? 3.4 : 2.6} fill={C.white} />
+                        {f.glossy && <circle cx={e.cx + 2.6} cy={EYE_CY + 5.5} r={1.6} fill={C.white} />}
                       </g>
                       <rect x={e.cx - 35} y={EYE_Y + EYE_H - f.lower} width={70} height={70} fill={C.face} />
                       <rect x={e.cx - 35} y={EYE_Y - 70 + f.lid} width={70} height={70} fill={C.faceShade}
@@ -424,10 +461,11 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
                     </>
                   ) : (
                     <>
-                      <motion.g initial={false} animate={{ x: px, y: py, scale: f.pupil }} transition={spring}
+                      <motion.g initial={false} animate={{ x: px, y: py, scale: f.pupil }} transition={eyeSpring}
                         style={{ originX: 0.5, originY: 0.5 }}>
                         <rect x={e.cx - 7.35} y={EYE_CY - 12} width={14.7} height={24} rx={7.35} fill={C.shade} />
-                        <circle cx={e.cx - 2.2} cy={EYE_CY - 6.5} r={2.6} fill={C.white} />
+                        <circle cx={e.cx - 2.2} cy={EYE_CY - 6.5} r={f.glossy ? 3.4 : 2.6} fill={C.white} />
+                        {f.glossy && <circle cx={e.cx + 2.6} cy={EYE_CY + 5.5} r={1.6} fill={C.white} />}
                       </motion.g>
                       <motion.rect x={e.cx - 35} y={EYE_Y + EYE_H} width={70} height={70} fill={C.face}
                         initial={false} animate={{ y: -(shut ? 0 : f.lower) }} transition={spring} />
@@ -539,12 +577,12 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
         </g>
       )}
       {has("heart") && (
-        <g className={popIn}><g className="byte-float"><path d={HEART_D} transform="translate(176 52) scale(1.5)" fill={C.tongue} /></g></g>
+        <g className={popIn}><g className="byte-float"><path d={HEART_D} transform="translate(186 46) scale(1.5)" fill={C.tongue} /></g></g>
       )}
       {has("dots") && (
         <g className={popIn} fill={C.heartGrey}>
           {[0, 1, 2].map((i) => (
-            <circle key={i} className="byte-dot" style={{ animationDelay: `${i * 0.18}s` }} cx={150 + i * 13} cy={22 - i * 7} r={4 + i * 1.6} />
+            <circle key={i} className="byte-dot" style={{ animationDelay: `${i * 0.18}s` }} cx={160 + i * 13} cy={18 - i * 7} r={4 + i * 1.6} />
           ))}
         </g>
       )}
