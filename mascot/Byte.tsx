@@ -18,7 +18,7 @@ export type MouthShape = "open" | "round" | "wide";
 
 export const MOODS = [
   "idle", "talking", "stare", "smug", "shocked", "sad", "locked-in",
-  "correct", "wrong", "level-up", "coding", "out-of-hearts", "chest",
+  "correct", "wrong", "level-up", "coding", "out-of-hearts", "chest", "wave", "thinking",
 ] as const;
 export type ByteMood = (typeof MOODS)[number];
 
@@ -62,7 +62,7 @@ type Face = {
   happy?: boolean;  // closed ∩ eyes
 };
 type Arm = { a: number; len: number; front?: boolean; dy?: number };
-type Prop = "sparkles" | "heart" | "smoke" | "laptop" | "chest" | "glow" | "tears" | "tear" | "broken-heart" | "brim";
+type Prop = "sparkles" | "heart" | "smoke" | "laptop" | "chest" | "glow" | "tears" | "tear" | "broken-heart" | "brim" | "dots";
 type Pose = { face: Face; arms: [Arm, Arm]; props?: Prop[] };
 
 const F = (o: Partial<Face> = {}): Face => ({ lid: 0, tilt: 0, lower: 0, center: false, look: 0, lift: 0, pupil: 1, jaw: 0, ...o });
@@ -85,6 +85,11 @@ const POSES: Record<ByteMood, Pose> = {
                arms: [{ a: 250, len: 44, front: true }, { a: 250, len: 44, front: true }], props: ["glow", "laptop"] },
   "out-of-hearts": { face: F({ lid: 20, tilt: -12, lower: 6, lift: 8, pupil: 0.85 }),
                arms: [{ a: -70, len: 38 }, { a: -70, len: 38 }], props: ["brim", "tear", "broken-heart"] },
+  // right flipper up; ByteRig swings it between 62° and 94° while waving
+  wave:      { face: F({ lift: -2, jaw: 7 }), arms: [{ a: -44, len: 40 }, { a: 78, len: 58 }] },
+  // right flipper to the chin, eyes up and away, thought dots
+  thinking:  { face: F({ lid: 8, look: -6, lift: -7, pupil: 0.9 }),
+               arms: [{ a: -44, len: 40 }, { a: 150, len: 55, front: true }], props: ["dots"] },
   chest:     { face: F({ lift: -4, jaw: 9 }),
                arms: [{ a: 242, len: 48, front: true }, { a: 242, len: 48, front: true }], props: ["chest"] },
 };
@@ -103,6 +108,8 @@ const BODY: Partial<Record<ByteMood, TargetAndTransition>> = {
   coding:    { y: [0, -1.5, 0], transition: { duration: 0.3, ease: "linear", ...forever } },
   "out-of-hearts": { y: [0, 2, 0], scaleY: [1, 0.98, 1], transition: { duration: 3.2, ease: "easeInOut", ...forever } },
   chest:     { y: [0, -3, 0], transition: { duration: 1.4, ease: "easeInOut", ...forever } },
+  wave:      { rotate: [0, 2, 0, -1, 0], transition: { duration: 1.1, ease: "easeInOut", ...forever } },
+  thinking:  { rotate: [0, -3, -3, 0], transition: { duration: 3, times: [0, 0.3, 0.7, 1], ease: "easeInOut", ...forever } },
   shocked:   { y: [0, -12, 0], scaleY: [1, 1.06, 1], transition: { duration: 0.4, ease: "easeOut" } },
   wrong:     { x: [0, -8, 8, -6, 6, -3, 0], transition: { duration: 0.5, ease: "easeInOut" } },
   // reactions crouch first (anticipation), then launch, then squash on landing
@@ -225,6 +232,17 @@ function useGaze(ref: { current: HTMLElement | null }, enabled: boolean) {
   return g;
 }
 
+/** Waving flipper: alternates between two angles (static targets, so it works on SVG). */
+function useWave(enabled: boolean) {
+  const [up, setUp] = useState(false);
+  useEffect(() => {
+    if (!enabled) { setUp(false); return; }
+    const id = setInterval(() => setUp((u) => !u), 260);
+    return () => clearInterval(id);
+  }, [enabled]);
+  return up;
+}
+
 /** Occasional glance left/right. */
 function useGlance(enabled: boolean) {
   const [dx, setDx] = useState(0);
@@ -297,6 +315,8 @@ const CSS = `
   @keyframes byte-pop { from { opacity: 0; transform: scale(.4) } to { opacity: 1; transform: scale(1) } }
   .byte-rise { animation: byte-rise .34s cubic-bezier(.34,1.56,.64,1) both }
   @keyframes byte-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: translateY(0) } }
+  .byte-dot { transform-box: fill-box; transform-origin: center; animation: byte-dot 1.2s ease-in-out infinite }
+  @keyframes byte-dot { 0%,100% { opacity: .45; transform: scale(.85) } 50% { opacity: 1; transform: scale(1) } }
   .byte-string { transform-box: fill-box; transform-origin: 50% 0 }
   .byte-sway .byte-string { animation: byte-sway 3.2s ease-in-out infinite }
   .byte-sway .byte-string + .byte-string { animation-delay: -1.1s }
@@ -306,7 +326,7 @@ const CSS = `
   @keyframes byte-swing { 0% { transform: rotate(0) } 20% { transform: rotate(11deg) } 45% { transform: rotate(-8deg) }
     70% { transform: rotate(4deg) } 100% { transform: rotate(0) } }
   @media (prefers-reduced-motion: reduce) {
-    .byte-twinkle, .byte-float, .byte-smoke, .byte-tear, .byte-string, .byte-pop, .byte-rise { animation: none !important }
+    .byte-twinkle, .byte-float, .byte-smoke, .byte-tear, .byte-string, .byte-pop, .byte-rise, .byte-dot { animation: none !important }
     .byte-tear { transform: translateY(2px) }
   }
 `;
@@ -330,7 +350,9 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
   const quick = { duration: 0.1, ease: "easeOut" as const };
   // viseme width: o/u narrow the beak, e/i widen it (only while the mouth layer is driving)
   const beakW = mouth !== undefined && mouthShape === "round" ? 0.82 : mouth !== undefined && mouthShape === "wide" ? 1.12 : 1;
-  const [left, right] = pose.arms;
+  const waving = useWave(mood === "wave" && !reduce && !still);
+  const [left, rightPose] = pose.arms;
+  const right = mood === "wave" ? { ...rightPose, a: waving ? 94 : 62 } : rightPose;
   // prop entrances are for live use; exported stills must show everything at frame 0
   const popIn = still ? undefined : "byte-pop";
   const riseIn = still ? undefined : "byte-rise";
@@ -518,6 +540,13 @@ export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false
       )}
       {has("heart") && (
         <g className={popIn}><g className="byte-float"><path d={HEART_D} transform="translate(176 52) scale(1.5)" fill={C.tongue} /></g></g>
+      )}
+      {has("dots") && (
+        <g className={popIn} fill={C.heartGrey}>
+          {[0, 1, 2].map((i) => (
+            <circle key={i} className="byte-dot" style={{ animationDelay: `${i * 0.18}s` }} cx={150 + i * 13} cy={22 - i * 7} r={4 + i * 1.6} />
+          ))}
+        </g>
       )}
       {has("broken-heart") && (
         <g className={popIn}><g className="byte-float">

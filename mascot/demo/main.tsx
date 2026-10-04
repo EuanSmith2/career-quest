@@ -18,6 +18,8 @@ const MOODS: MoodInfo[] = [
   { mood: "coding", label: "Coding", when: "Loading or lab starting" },
   { mood: "out-of-hearts", label: "Out of hearts", when: "No hearts left" },
   { mood: "chest", label: "Chest", when: "Quests page, rewards" },
+  { mood: "wave", label: "Wave", when: "Onboarding hello" },
+  { mood: "thinking", label: "Thinking", when: "Matching your career" },
 ];
 
 const LESSON: { mood: ByteMood; line: string; ms: number }[] = [
@@ -70,7 +72,7 @@ function App() {
     <>
       <header className="top">
         <h1>Byte</h1>
-        <p className="sub">The Career Quest mascot. Thirteen moods, one vector rig, no image files.</p>
+        <p className="sub">The Career Quest mascot. Fifteen moods, one vector rig, no image files.</p>
       </header>
 
       <section className="stage-wrap">
@@ -130,7 +132,7 @@ function App() {
             <div className={g.rig ? "grid faces" : "grid bodies"} key={gridRun}>
               {MOODS.filter((m) => !!m.rig === g.rig).map((m) => (
                 <figure key={m.mood} className="cell">
-                  <Byte mood={m.mood} size={124} />
+                  <Byte mood={m.mood} size={112} />
                   <figcaption>
                     <strong>{m.label}{m.rig && <span className="dot" />}</strong>
                     <span>{m.when}</span>

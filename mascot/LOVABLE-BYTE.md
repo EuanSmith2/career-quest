@@ -16,7 +16,8 @@ Add our mascot. I'm pasting one component file below.
    --byte-shadow: #dfe1ee and --byte-backdrop: transparent in light mode,
    --byte-shadow: #0d1518 and --byte-backdrop: #263840 in .dark.
 3. Replace every existing mascot/robot placeholder with <Byte mood="..." />:
-   - Onboarding speech bubble: "idle", lip-synced to the text with useLipSync (step 4)
+   - Onboarding: open on "wave" for the first hello, then "idle", lip-synced to the bubble text with useLipSync (step 4)
+   - "Byte is thinking" (the typing indicator before a career match): "thinking"
    - Lesson: "correct" on a right answer, "wrong" on a wrong one, then back to "idle" after ~1.5s
    - Lesson complete: "level-up" (keep the existing confetti)
    - Out-of-hearts screen: "out-of-hearts". Quit modal and streak lost: "sad"

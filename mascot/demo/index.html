@@ -93,14 +93,14 @@
   .sheet-head .mood { padding: 8px 14px; }
   .grid { display: grid; gap: 12px; }
   .grid.faces { grid-template-columns: repeat(7, minmax(0, 1fr)); }
-  .grid.bodies { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .grid.bodies { grid-template-columns: repeat(8, minmax(0, 1fr)); }
   .sheet .group { margin-top: 12px; }
   .cell { margin: 0; border: 2px solid var(--border); border-radius: 16px; padding: 16px 12px 14px; display: grid; grid-template-rows: auto 1fr; justify-items: center; align-items: start; gap: 10px; }
   .cell figcaption { display: grid; align-content: start; gap: 2px; text-align: center; }
   .cell strong { font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
   .cell span:not(.dot) { font-size: 13px; line-height: 18px; color: var(--muted-fg); }
 
-  @media (max-width: 1020px) { .grid.faces { grid-template-columns: repeat(4, minmax(0, 1fr)); } .grid.bodies { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 1020px) { .grid.faces { grid-template-columns: repeat(4, minmax(0, 1fr)); } .grid.bodies { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   @media (max-width: 760px) {
     .stage-wrap { grid-template-columns: 1fr; }
     .stage { min-height: 340px; }

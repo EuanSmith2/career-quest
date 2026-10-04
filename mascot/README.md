@@ -1,6 +1,6 @@
 # Byte mascot
 
-One React component, no image files. All 13 moods are the same vector rig in a different configuration.
+One React component, no image files. All 15 moods are the same vector rig in a different configuration.
 The body, face, eyes, beak, feet and flippers are measured from the front pose of `src/sheet.jpg`
 (silhouette overlap 95.4%), so the rig is a 1:1 of the original design; the poses and props are new.
 
@@ -20,7 +20,7 @@ The body, face, eyes, beak, feet and flippers are measured from the front pose o
 | Kind | Moods |
 |---|---|
 | Face (blink, glance, talk) | idle, talking, stare, smug, shocked, sad, locked-in |
-| Body | correct, wrong, level-up, coding, out-of-hearts, chest |
+| Body | correct, wrong, level-up, coding, out-of-hearts, chest, wave, thinking |
 
 - A pose is arm angles + a face (eyelid drop/tilt, pupil offset/scale, beak) + props (sparkles, heart, smoke,
   laptop, chest, tears, broken heart, hood brim). Add a mood by adding one entry to `POSES`.
