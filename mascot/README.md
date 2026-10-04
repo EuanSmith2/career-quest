@@ -28,6 +28,19 @@ The body, face, eyes, beak, feet and flippers are measured from the front pose o
 - Reactions (correct, wrong, shocked, level-up) play once and hold. Everything else loops gently.
 - `prefers-reduced-motion`: no loops, blinks, glances or flaps; expressions still show.
 
+## Talking (lip sync)
+Modelled on how Duolingo animates its characters (Rive state machines with a separate mouth layer driven by
+viseme timings, per their 2022 engineering blog). Byte's mouth is its own layer: pass `mouth` (0–1) on top of
+any mood. `useLipSync(text)` types the line and returns the matching beak openness from one clock, so the
+bubble and the beak can't drift apart:
+
+```tsx
+const { typed, mouth, skip } = useLipSync(line);
+<Bubble onClick={skip}>{typed}</Bubble>
+<Byte mood="correct" mouth={mouth} />
+```
+Vowels open wide, o/u round, m/b/p close, punctuation pauses. An idle Byte also nods or tilts every 7–12 s.
+
 ## Theming
 `--byte-shadow` (floor pill, a darker shade of the ground) and `--byte-backdrop` (flat disc behind him;
 set it in dark mode, e.g. `#263840` on `#131f24`, or the charcoal hood disappears).

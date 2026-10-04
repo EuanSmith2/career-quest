@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Byte, type ByteMood } from "../Byte";
+import { Byte, useLipSync, type ByteMood } from "../Byte";
 
 type MoodInfo = { mood: ByteMood; label: string; when: string; rig?: boolean };
 
@@ -55,6 +55,9 @@ function App() {
     timers.current.push(setTimeout(() => { setMood("idle"); setLine("Again?"); setPlaying(false); }, t));
   };
 
+  // one clock drives the typed bubble and the beak (Duolingo-style viseme lip sync)
+  const speech = useLipSync(line);
+
   const pick = (m: MoodInfo) => {
     stop();
     if (m.mood === mood) setReplay((n) => n + 1);
@@ -72,8 +75,11 @@ function App() {
 
       <section className="stage-wrap">
         <div className="stage">
-          <div className="bubble" aria-live="polite">{line}</div>
-          <Byte key={replay} mood={mood} size={280} />
+          <div className="bubble" aria-live="polite" onClick={speech.skip}>
+            <span aria-hidden="true">{speech.typed}</span>
+            <span className="sr-only">{line}</span>
+          </div>
+          <Byte key={replay} mood={mood} mouth={speech.mouth} size={280} />
         </div>
 
         <div className="controls">
@@ -113,6 +119,7 @@ function App() {
           <button className="mood" id="replay-all" onClick={() => setGridRun((n) => n + 1)}>Replay reactions</button>
         </div>
         <p className="note">
+          Every line in the bubble is lip-synced: the beak follows the letters as they type, on top of whatever pose he's in.
           Green dot: face moods that blink, glance and talk. The rest are body poses on the same rig: switching swings the arms
           rather than swapping a picture. Reactions like Correct and Wrong play once and hold; pick one again to replay it.
         </p>

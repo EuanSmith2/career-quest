@@ -49,8 +49,10 @@
   }
   .bubble {
     position: relative; overflow-wrap: anywhere; background: var(--bubble); border: 2px solid var(--bubble-border); border-radius: 16px;
-    padding: 12px 16px; font-weight: 700; max-width: 34ch; text-align: center; min-height: 52px;
+    padding: 12px 16px; font-weight: 700; width: min(34ch, 100%); text-align: center; min-height: 76px; display: grid; place-items: center;
   }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bubble { cursor: default; }
   .bubble::after {
     content: ""; position: absolute; left: 50%; bottom: -9px; width: 14px; height: 14px; translate: -50% 0; rotate: 45deg;
     background: var(--bubble); border-right: 2px solid var(--bubble-border); border-bottom: 2px solid var(--bubble-border);
