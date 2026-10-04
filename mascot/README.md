@@ -35,11 +35,25 @@ any mood. `useLipSync(text)` types the line and returns the matching beak openne
 bubble and the beak can't drift apart:
 
 ```tsx
-const { typed, mouth, skip } = useLipSync(line);
+const { typed, mouth, mouthShape, skip } = useLipSync(line);
 <Bubble onClick={skip}>{typed}</Bubble>
-<Byte mood="correct" mouth={mouth} />
+<Byte mood="correct" mouth={mouth} mouthShape={mouthShape} />
 ```
-Vowels open wide, o/u round, m/b/p close, punctuation pauses. An idle Byte also nods or tilts every 7–12 s.
+Vowels open wide, o/u narrow the beak, e/i widen it, m/b/p close it, punctuation pauses.
+
+## Props
+| Prop | Default | What |
+|---|---|---|
+| `mood` | `"idle"` | one of the 13 moods |
+| `size` | `160` | width in px (height ×0.93) |
+| `mouth` / `mouthShape` | – | mouth layer from `useLipSync`, works over any mood |
+| `followPointer` | `false` | pupils track the pointer; use on the hero / onboarding, not in lessons |
+
+## Motion craft
+- **Anticipation:** reactions crouch before they hop; the floor shadow swells, then shrinks in the air.
+- **Secondary motion:** drawstrings sway when calm and swing after a jolt.
+- **Idle life:** blink every 3–6 s, glance, nod or tilt every 7–12 s, breathing.
+- **Transitions:** arms swing on springs between poses; props pop or rise in; every change gets a small squash.
 
 ## Theming
 `--byte-shadow` (floor pill, a darker shade of the ground) and `--byte-backdrop` (flat disc behind him;

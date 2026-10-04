@@ -14,6 +14,8 @@ import { motion, useAnimationControls, useReducedMotion, type TargetAndTransitio
  * Theming: --byte-shadow (floor pill) and --byte-backdrop (disc behind him, for dark mode).
  */
 
+export type MouthShape = "open" | "round" | "wide";
+
 export const MOODS = [
   "idle", "talking", "stare", "smug", "shocked", "sad", "locked-in",
   "correct", "wrong", "level-up", "coding", "out-of-hearts", "chest",
@@ -25,6 +27,10 @@ type Props = {
   /** Mouth openness 0–1, driven from outside (see useLipSync). Runs as its own layer on top of
    *  any mood, so Byte can talk while celebrating. Leave undefined to let the mood decide. */
   mouth?: number;
+  /** Beak shape while talking: "round" for o/u, "wide" for e/i (useLipSync returns it). */
+  mouthShape?: MouthShape;
+  /** Pupils follow the pointer (hero, onboarding). Off by default: in lessons it competes with the content. */
+  followPointer?: boolean;
   /** Width in px. Height is size × 0.93. */
   size?: number;
   className?: string;
@@ -73,14 +79,14 @@ const POSES: Record<ByteMood, Pose> = {
   "locked-in": { face: F({ lid: 22, tilt: 12, lower: 12, center: true, pupil: 0.8 }), arms: [{ a: -54, len: 40 }, { a: -54, len: 40 }], props: ["glow"] },
   correct:   { face: F({ lift: -3, jaw: 11 }), arms: [{ a: 60, len: 60 }, { a: 60, len: 60 }], props: ["sparkles"] },
   wrong:     { face: F({ lid: 20, tilt: 10, look: 7, pupil: 0.9 }),
-               arms: [{ a: 186, len: 70, front: true, dy: 8 }, { a: 186, len: 70, front: true, dy: 22 }], props: ["smoke"] },
+               arms: [{ a: 207, len: 64, front: true, dy: -2 }, { a: 163, len: 64, front: true, dy: 26 }], props: ["smoke"] },
   "level-up": { face: F({ happy: true, jaw: 9 }), arms: [{ a: 18, len: 50 }, { a: 18, len: 50 }], props: ["sparkles", "heart"] },
   coding:    { face: F({ lid: 20, tilt: 8, lower: 10, center: true, lift: 4, pupil: 0.8 }),
                arms: [{ a: 250, len: 44, front: true }, { a: 250, len: 44, front: true }], props: ["glow", "laptop"] },
   "out-of-hearts": { face: F({ lid: 20, tilt: -12, lower: 6, lift: 8, pupil: 0.85 }),
                arms: [{ a: -70, len: 38 }, { a: -70, len: 38 }], props: ["brim", "tear", "broken-heart"] },
   chest:     { face: F({ lift: -4, jaw: 9 }),
-               arms: [{ a: 238, len: 58, front: true }, { a: 238, len: 58, front: true }], props: ["chest"] },
+               arms: [{ a: 242, len: 48, front: true }, { a: 242, len: 48, front: true }], props: ["chest"] },
 };
 
 /* ================================================================ motion */
@@ -99,13 +105,15 @@ const BODY: Partial<Record<ByteMood, TargetAndTransition>> = {
   chest:     { y: [0, -3, 0], transition: { duration: 1.4, ease: "easeInOut", ...forever } },
   shocked:   { y: [0, -12, 0], scaleY: [1, 1.06, 1], transition: { duration: 0.4, ease: "easeOut" } },
   wrong:     { x: [0, -8, 8, -6, 6, -3, 0], transition: { duration: 0.5, ease: "easeInOut" } },
-  correct:   { y: [0, -26, 0, 0], scaleY: [1, 1.06, 0.92, 1], scaleX: [1, 0.96, 1.06, 1],
-               transition: { duration: 0.6, times: [0, 0.4, 0.75, 1], ease: "easeOut", repeat: 1, repeatDelay: 0.15 } },
-  "level-up": { y: [0, -14, 0], rotate: [0, -5, 5, 0], transition: { duration: 0.8, ease: "easeInOut", repeat: 2, repeatDelay: 0.2 } },
+  // reactions crouch first (anticipation), then launch, then squash on landing
+  correct:   { y: [0, 3, -26, 0, 0], scaleY: [1, 0.9, 1.07, 0.92, 1], scaleX: [1, 1.07, 0.96, 1.06, 1],
+               transition: { duration: 0.72, times: [0, 0.14, 0.45, 0.78, 1], ease: "easeOut", repeat: 1, repeatDelay: 0.12 } },
+  "level-up": { y: [0, 2, -14, 0], scaleY: [1, 0.94, 1.04, 1], rotate: [0, 0, -5, 0],
+               transition: { duration: 0.85, times: [0, 0.2, 0.55, 1], ease: "easeInOut", repeat: 2, repeatDelay: 0.2 } },
 };
 const SHADOW: Partial<Record<ByteMood, TargetAndTransition>> = {
-  correct:   { scaleX: [1, 0.7, 1, 1], opacity: [1, 0.6, 1, 1], transition: BODY.correct!.transition },
-  "level-up": { scaleX: [1, 0.82, 1], transition: BODY["level-up"]!.transition },
+  correct:   { scaleX: [1, 1.05, 0.7, 1, 1], opacity: [1, 1, 0.6, 1, 1], transition: BODY.correct!.transition },
+  "level-up": { scaleX: [1, 1.03, 0.82, 1], transition: BODY["level-up"]!.transition },
   shocked:   { scaleX: [1, 0.85, 1], transition: BODY.shocked!.transition },
   chest:     { scaleX: [1, 0.97, 1], transition: BODY.chest!.transition },
 };
@@ -116,7 +124,7 @@ const FIDGET_TILT = { rotate: [0, -4, -4, 0], transition: { duration: 1.6, times
 
 /* ================================================================ component */
 
-export function Byte({ mood = "idle", mouth, size = 160, className }: Props) {
+export function Byte({ mood = "idle", mouth, mouthShape, followPointer = false, size = 160, className }: Props) {
   const reduce = !!useReducedMotion();
   const pop = useAnimationControls();
   useEffect(() => { if (!reduce) pop.start(POP); }, [mood, reduce, pop]);
@@ -135,10 +143,12 @@ export function Byte({ mood = "idle", mouth, size = 160, className }: Props) {
     return () => clearTimeout(t);
   }, [mood, reduce, pop]);
 
+  const box = useRef<HTMLDivElement>(null);
+  const gaze = useGaze(box, followPointer && !reduce);
   const fill = { position: "absolute" as const, inset: 0, width: "100%", height: "100%" };
 
   return (
-    <div className={className} style={{ position: "relative", width: size, height: size * ASPECT }}
+    <div ref={box} className={className} style={{ position: "relative", width: size, height: size * ASPECT }}
       role="img" aria-label={`Byte, ${mood.replace(/-/g, " ")}`}>
       <svg viewBox={VIEWBOX} style={fill} aria-hidden="true">
         <circle cx={100} cy={112} r={112} style={{ fill: "var(--byte-backdrop, transparent)" }} />
@@ -156,7 +166,7 @@ export function Byte({ mood = "idle", mouth, size = 160, className }: Props) {
       />
       <motion.div style={{ ...fill, originY: 0.9 }} animate={pop}>
         <motion.div style={{ ...fill, originY: 0.9 }} animate={reduce ? undefined : BODY[mood]}>
-          <ByteRig mood={mood} mouth={mouth} reduce={reduce} />
+          <ByteRig mood={mood} mouth={mouth} mouthShape={mouthShape} gaze={gaze} reduce={reduce} />
         </motion.div>
       </motion.div>
     </div>
@@ -189,6 +199,30 @@ function useFlap(enabled: boolean) {
     return () => clearInterval(id);
   }, [enabled]);
   return open;
+}
+
+/** Pupil offset towards the pointer, in rig units (±5 x, ±4 y). rAF-throttled. */
+function useGaze(ref: { current: HTMLElement | null }, enabled: boolean) {
+  const [g, setG] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    if (!enabled) { setG({ x: 0, y: 0 }); return; }
+    let raf = 0;
+    const onMove = (e: PointerEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = ref.current?.getBoundingClientRect();
+        if (!r) return;
+        const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height * 0.35);
+        const k = (v: number) => Math.max(-1, Math.min(1, v / 320));
+        setG({ x: k(dx) * 5, y: k(dy) * 4 });
+      });
+    };
+    const reset = () => setG({ x: 0, y: 0 });
+    window.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerleave", reset);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("pointermove", onMove); document.removeEventListener("pointerleave", reset); };
+  }, [ref, enabled]);
+  return g;
 }
 
 /** Occasional glance left/right. */
@@ -244,6 +278,7 @@ const Sparkle = ({ x, y, s, c, d }: { x: number; y: number; s: number; c: string
       d="M0 -10 C1.5 -2.5 2.5 -1.5 10 0 C2.5 1.5 1.5 2.5 0 10 C-1.5 2.5 -2.5 1.5 -10 0 C-2.5 -1.5 -1.5 -2.5 0 -10 Z" />
   </g>
 );
+const SWING: ByteMood[] = ["correct", "level-up", "shocked", "wrong"];
 const HEART_D = "M0 6 C-7 0 -13 -4 -10 -10 C-7 -15 -1 -13 0 -8 C1 -13 7 -15 10 -10 C13 -4 7 0 0 6 Z";
 
 // CSS keyframes for SVG-internal loops (framer transform keyframes don't apply inside SVG).
@@ -258,29 +293,47 @@ const CSS = `
   .byte-tear + .byte-tear { animation-delay: .6s }
   @keyframes byte-tear { 0% { opacity: 0; transform: translateY(0) } 15% { opacity: 1; transform: translateY(2px) }
     80% { opacity: 1; transform: translateY(14px) } 100% { opacity: 0; transform: translateY(18px) } }
+  .byte-pop { transform-box: fill-box; transform-origin: center; animation: byte-pop .32s cubic-bezier(.34,1.56,.64,1) both }
+  @keyframes byte-pop { from { opacity: 0; transform: scale(.4) } to { opacity: 1; transform: scale(1) } }
+  .byte-rise { animation: byte-rise .34s cubic-bezier(.34,1.56,.64,1) both }
+  @keyframes byte-rise { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: translateY(0) } }
+  .byte-string { transform-box: fill-box; transform-origin: 50% 0 }
+  .byte-sway .byte-string { animation: byte-sway 3.2s ease-in-out infinite }
+  .byte-sway .byte-string + .byte-string { animation-delay: -1.1s }
+  @keyframes byte-sway { 0%,100% { transform: rotate(2deg) } 50% { transform: rotate(-2deg) } }
+  .byte-swing .byte-string { animation: byte-swing .9s ease-out 2 }
+  .byte-swing .byte-string + .byte-string { animation-delay: .06s }
+  @keyframes byte-swing { 0% { transform: rotate(0) } 20% { transform: rotate(11deg) } 45% { transform: rotate(-8deg) }
+    70% { transform: rotate(4deg) } 100% { transform: rotate(0) } }
   @media (prefers-reduced-motion: reduce) {
-    .byte-twinkle, .byte-float, .byte-smoke, .byte-tear { animation: none }
+    .byte-twinkle, .byte-float, .byte-smoke, .byte-tear, .byte-string, .byte-pop, .byte-rise { animation: none !important }
     .byte-tear { transform: translateY(2px) }
   }
 `;
 
 /** The full figure. Exported for static use (favicon, og-image). */
-export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }: {
-  mood?: ByteMood; mouth?: number; reduce?: boolean;
+export function ByteRig({ mood = "idle", mouth, mouthShape, gaze, reduce = false, still = false }: {
+  mood?: ByteMood; mouth?: number; mouthShape?: MouthShape; gaze?: { x: number; y: number }; reduce?: boolean;
   /** Plain SVG transforms instead of framer-motion, for server-rendered / exported stills. */
   still?: boolean;
 }) {
-  const uid = useId().replace(/:/g, "");
+  // React 18 ids contain ":", React 19 ids contain "«»"; keep only characters safe in url(#…)
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const pose = POSES[mood] ?? POSES.idle;
   const f = pose.face;
   const has = (p: Prop) => pose.props?.includes(p) ?? false;
   const shut = useBlink(!["stare", "shocked", "level-up"].includes(mood) && !reduce && !still);
-  const glance = useGlance(mood === "idle" && !reduce);
+  const glance = useGlance(mood === "idle" && !gaze?.x && !gaze?.y && !reduce);
   const flap = useFlap(mood === "talking" && mouth === undefined && !reduce);
   // mouth layer wins over the mood's own beak; otherwise the talking flap, otherwise the pose
   const jawDrop = mouth !== undefined ? Math.max(0, Math.min(1, mouth)) * 10 : flap ? 7 : f.jaw;
   const quick = { duration: 0.1, ease: "easeOut" as const };
+  // viseme width: o/u narrow the beak, e/i widen it (only while the mouth layer is driving)
+  const beakW = mouth !== undefined && mouthShape === "round" ? 0.82 : mouth !== undefined && mouthShape === "wide" ? 1.12 : 1;
   const [left, right] = pose.arms;
+  // prop entrances are for live use; exported stills must show everything at frame 0
+  const popIn = still ? undefined : "byte-pop";
+  const riseIn = still ? undefined : "byte-rise";
 
   return (
     <svg viewBox={VIEWBOX} width="100%" height="100%" aria-hidden="true" style={{ overflow: "visible" }}>
@@ -295,10 +348,10 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
 
       {/* props behind him */}
       {has("smoke") && (
-        <g className="byte-smoke" fill={C.smoke}>
+        <g className={popIn}><g className="byte-smoke" fill={C.smoke}>
           <circle cx={150} cy={14} r={13} /><circle cx={166} cy={4} r={12} /><circle cx={174} cy={20} r={11} />
           <circle cx={160} cy={24} r={10} /><circle cx={140} cy={34} r={5} />
-        </g>
+        </g></g>
       )}
 
       {/* back sleeves (tucked behind the body, so no shoulder joint shows) */}
@@ -320,9 +373,9 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
 
       {/* screen light on the lower face */}
       {has("glow") && (
-        <motion.path d="M70 112 C82 108 118 108 130 112 C122 122 112 128 100 131 C88 128 78 122 70 112 Z" fill={C.green}
-          initial={{ opacity: 0.3 }}
-          animate={reduce ? { opacity: 0.3 } : { opacity: [0.26, 0.36, 0.28, 0.34, 0.26], transition: { duration: 1.2, ...forever } }} />
+        <motion.path d="M56 98 C72 94 128 94 144 98 C141 114 123 127 100 132 C77 127 59 114 56 98 Z" fill={C.green}
+          initial={{ opacity: 0.2 }}
+          animate={reduce ? { opacity: 0.2 } : { opacity: [0.16, 0.24, 0.18, 0.22, 0.16], transition: { duration: 1.2, ...forever } }} />
       )}
 
       {/* eyes */}
@@ -331,8 +384,8 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
             <path key={e.side} d={`M${e.cx - 13} 84 Q${e.cx} 66 ${e.cx + 13} 84`} stroke={C.shade} strokeWidth={6} strokeLinecap="round" fill="none" />
           ))
         : EYES.map((e) => {
-            const px = (f.center ? 0 : 3.4 * e.sign) + f.look + glance;
-            const py = (f.center ? 0 : 3.5) + f.lift;
+            const px = (f.center ? 0 : 3.4 * e.sign) + f.look + glance + (gaze?.x ?? 0);
+            const py = (f.center ? 0 : 3.5) + f.lift + (gaze?.y ?? 0);
             return (
               <g key={e.side}>
                 <rect x={e.cx - EYE_W / 2} y={EYE_Y} width={EYE_W} height={EYE_H} rx={EYE_W / 2} ry={EYE_RY} fill={C.white} />
@@ -385,38 +438,40 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
       {/* beak: mouth + tongue sit behind the jaw and show when it drops */}
       {still ? (
         <>
-          <g transform={`translate(0 99.8) scale(1 ${1 + jawDrop / 8}) translate(0 -99.8)`} opacity={jawDrop > 0 ? 1 : 0}>
-            <path d="M93.5 99.8 L108.2 99.8 L104.8 105.8 C103.2 107.2 98.6 107.2 97 105.8 Z" fill={C.shade} />
-            <ellipse cx={100.9} cy={104.8} rx={4.4} ry={2} fill={C.tongue} />
+          <g transform={`translate(0 98.8) scale(1 ${1 + jawDrop / 8}) translate(0 -98.8)`} opacity={jawDrop > 0 ? 1 : 0}>
+            <path d="M92.5 98.8 C95 98.5 106.8 98.5 109.3 98.8 C108.6 103.6 105 107.6 100.9 107.9 C96.8 107.6 93.2 103.6 92.5 98.8 Z" fill={C.shade} />
+            <ellipse cx={100.9} cy={105.4} rx={5} ry={2.4} fill={C.tongue} />
           </g>
           <path d="M93.4 98.6 C96.6 100.6 105.2 100.6 108.4 98.6 C107 103.6 103.6 107.6 100.9 108.2 C98.2 107.6 94.8 103.6 93.4 98.6 Z" fill={C.beakLow}
             transform={`translate(0 ${jawDrop})`} />
         </>
       ) : (
         <>
-          <motion.g initial={false} animate={{ scaleY: 1 + jawDrop / 8, opacity: jawDrop > 0 ? 1 : 0 }} transition={quick} style={{ originY: 0 }}>
-            <path d="M93.5 99.8 L108.2 99.8 L104.8 105.8 C103.2 107.2 98.6 107.2 97 105.8 Z" fill={C.shade} />
-            <ellipse cx={100.9} cy={104.8} rx={4.4} ry={2} fill={C.tongue} />
+          <motion.g initial={false} animate={{ scaleY: 1 + jawDrop / 8, scaleX: beakW, opacity: jawDrop > 0 ? 1 : 0 }} transition={quick} style={{ originY: 0, originX: 0.5 }}>
+            <path d="M92.5 98.8 C95 98.5 106.8 98.5 109.3 98.8 C108.6 103.6 105 107.6 100.9 107.9 C96.8 107.6 93.2 103.6 92.5 98.8 Z" fill={C.shade} />
+            <ellipse cx={100.9} cy={105.4} rx={5} ry={2.4} fill={C.tongue} />
           </motion.g>
           <motion.path d="M93.4 98.6 C96.6 100.6 105.2 100.6 108.4 98.6 C107 103.6 103.6 107.6 100.9 108.2 C98.2 107.6 94.8 103.6 93.4 98.6 Z" fill={C.beakLow}
-            initial={false} animate={{ y: jawDrop }} transition={quick} />
+            initial={false} animate={{ y: jawDrop, scaleX: beakW }} transition={quick} style={{ originX: 0.5 }} />
         </>
       )}
       <path d="M90.2 93.2 C90.6 90.4 95 89.6 100.9 89.6 C106.8 89.6 111.2 90.4 111.6 93.2 C110.8 97.8 104.8 101.8 100.9 102.6 C97 101.8 91 97.8 90.2 93.2 Z" fill={C.beak} />
 
-      {/* drawstrings + zip */}
-      <g stroke={C.green} strokeWidth={5.5} strokeLinecap="round" fill="none">
-        <path d="M82.6 130 C82.3 140 82 148 81.9 156" /><path d="M119.2 130 C119.5 140 119.8 148 119.9 156" />
-      </g>
-      <g fill={C.green}>
-        <rect x={76.7} y={153} width={10.3} height={12} rx={5.15} /><rect x={114.7} y={153} width={10.3} height={12} rx={5.15} />
+      {/* drawstrings: secondary motion. They sway gently, and swing after a jolt (hop, shock, shake). */}
+      <g key={`strings-${mood}`} className={still ? undefined : SWING.includes(mood) ? "byte-swing" : "byte-sway"}>
+        {[{ x: 82.25, tip: 76.7 }, { x: 119.55, tip: 114.7 }].map((d) => (
+          <g key={d.x} className="byte-string">
+            <path d={`M${d.x} 130 L${d.x - 0.3} 156`} stroke={C.green} strokeWidth={5.5} strokeLinecap="round" fill="none" />
+            <rect x={d.tip} y={153} width={10.3} height={12} rx={5.15} fill={C.green} />
+          </g>
+        ))}
       </g>
       <rect x={94} y={135.6} width={12} height={19.8} rx={6} fill={C.zip} />
 
 
       {/* the chest sits in front of his body, under his arms (he's hugging it) */}
       {has("chest") && (
-        <g>
+        <g className={riseIn}><g transform="translate(100 206) scale(1.14) translate(-100 -206)">
           {/* light spilling from the open lid */}
           <path d="M66 166 C78 151 122 151 134 166 Z" fill={C.glow} />
           <rect x={62} y={166} width={76} height={40} rx={8} fill={C.wood} />
@@ -432,14 +487,15 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
             <rect x={91} y={176} width={18} height={16} rx={5} />
           </g>
           <rect x={98} y={180} width={4} height={8} rx={2} fill={C.woodShade} />
-        </g>
+        </g></g>
       )}
       {/* arms that sit in front of the body; the laptop goes over them (hands on the keyboard) */}
-      {left.front && <Sleeve arm={left} still={still} />}
+      {/* right first, so the left (descending) arm lies on top when they cross */}
       {right.front && <Sleeve arm={right} right still={still} />}
+      {left.front && <Sleeve arm={left} still={still} />}
 
       {has("laptop") && (
-        <g>
+        <g className={riseIn}>
           <rect x={52} y={140} width={96} height={56} rx={9} fill={C.laptop} />
           <rect x={92} y={160} width={16} height={12} rx={3} fill={C.green} />
           <path d="M95.5 163 L99 166 L95.5 169" stroke={C.laptop} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
@@ -453,7 +509,7 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
 
       {/* props in front */}
       {has("sparkles") && (
-        <g>
+        <g className={popIn}>
           <Sparkle x={8} y={34} s={1.1} c={C.yellow} d={0} />
           <Sparkle x={196} y={22} s={1} c={C.blue} d={0.4} />
           <Sparkle x={-6} y={120} s={0.8} c={C.blue} d={0.8} />
@@ -461,13 +517,13 @@ export function ByteRig({ mood = "idle", mouth, reduce = false, still = false }:
         </g>
       )}
       {has("heart") && (
-        <g className="byte-float"><path d={HEART_D} transform="translate(176 52) scale(1.5)" fill={C.tongue} /></g>
+        <g className={popIn}><g className="byte-float"><path d={HEART_D} transform="translate(176 52) scale(1.5)" fill={C.tongue} /></g></g>
       )}
       {has("broken-heart") && (
-        <g className="byte-float">
+        <g className={popIn}><g className="byte-float">
           <path d={HEART_D} transform="translate(170 26) scale(1.6)" fill={C.heartGrey} />
           <path d="M170 10 L166 20 L173 26 L168 36" stroke={C.white} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        </g>
+        </g></g>
       )}
     </svg>
   );
@@ -488,12 +544,12 @@ const PAUSE: Record<string, number> = { ",": 140, ";": 160, ":": 160, ".": 260, 
  * Types `text` out and returns the beak openness for each moment, from one clock, so the speech
  * bubble and the beak can never drift apart.
  *
- *   const { typed, mouth, done, skip } = useLipSync(line);
- *   <Bubble>{typed}</Bubble>  <Byte mood="idle" mouth={mouth} />
+ *   const { typed, mouth, mouthShape, skip } = useLipSync(line);
+ *   <Bubble onClick={skip}>{typed}</Bubble>  <Byte mood="idle" mouth={mouth} mouthShape={mouthShape} />
  */
 export function useLipSync(text: string, { cps = 30, enabled = true }: { cps?: number; enabled?: boolean } = {}) {
   const [i, setI] = useState(0);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     setI(0);
     if (!enabled) { setI(text.length); return; }
@@ -512,7 +568,8 @@ export function useLipSync(text: string, { cps = 30, enabled = true }: { cps?: n
   const done = i >= text.length;
   const ch = (text[i - 1] ?? " ").toLowerCase();
   const mouth = done ? undefined : /[a-z\u00c0-\u017f]/.test(ch) ? VISEME[ch] ?? 0.3 : 0;
-  return { typed: text.slice(0, i), mouth, done, skip };
+  const mouthShape: MouthShape = "oóuúwq".includes(ch) ? "round" : "eéiíy".includes(ch) ? "wide" : "open";
+  return { typed: text.slice(0, i), mouth, mouthShape, done, skip };
 }
 
 export default Byte;

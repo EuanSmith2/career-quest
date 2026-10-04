@@ -25,8 +25,10 @@ Add our mascot. I'm pasting one component file below.
    - /quests hero card: "chest"
    - Learner idle for 20s mid-lesson: "stare"
 4. Whenever Byte says something in a speech bubble, use the exported useLipSync hook so his beak moves with the text:
-   const { typed, mouth, skip } = useLipSync(line);  render {typed} in the bubble (click = skip) and pass mouth={mouth} to <Byte />.
-   This works on top of any mood, e.g. <Byte mood="correct" mouth={mouth} />. Don't build a separate typing animation.
+   const { typed, mouth, mouthShape, skip } = useLipSync(line);  render {typed} in the bubble (click = skip) and pass
+   mouth={mouth} mouthShape={mouthShape} to <Byte />. This works on top of any mood, e.g. <Byte mood="correct" mouth={mouth} mouthShape={mouthShape} />.
+   Don't build a separate typing animation.
+   On the landing hero and onboarding only, add followPointer so his eyes follow the cursor.
 5. Sizes: 180px in lessons, 140px on the path, 240px on the landing hero, 160px on the quests card.
 
 Do not draw any other mascot art, add new moods, or change the component's animation values.

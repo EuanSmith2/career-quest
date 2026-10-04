@@ -79,7 +79,7 @@ function App() {
             <span aria-hidden="true">{speech.typed}</span>
             <span className="sr-only">{line}</span>
           </div>
-          <Byte key={replay} mood={mood} mouth={speech.mouth} size={280} />
+          <Byte key={replay} mood={mood} mouth={speech.mouth} mouthShape={speech.mouthShape} followPointer size={280} />
         </div>
 
         <div className="controls">
@@ -119,7 +119,8 @@ function App() {
           <button className="mood" id="replay-all" onClick={() => setGridRun((n) => n + 1)}>Replay reactions</button>
         </div>
         <p className="note">
-          Every line in the bubble is lip-synced: the beak follows the letters as they type, on top of whatever pose he's in.
+          Every line in the bubble is lip-synced: the beak opens, narrows and widens with the letters as they type, on top of
+          whatever pose he's in. The big Byte's eyes follow your pointer.
           Green dot: face moods that blink, glance and talk. The rest are body poses on the same rig: switching swings the arms
           rather than swapping a picture. Reactions like Correct and Wrong play once and hold; pick one again to replay it.
         </p>
