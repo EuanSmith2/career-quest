@@ -1,6 +1,6 @@
 # Career Quest: Lovable build prompts
 
-Order: **Prompt 1** (the app) → **Prompt 1B** (Duolingo details + 21st.dev spin) → 2 (Live Battle) → 3 (polish) → 4 (Notion). Let each finish before sending the next.
+Order: **Prompt 1** (the app) → **add Byte** (run `lovable-kit/install-byte.sh <repo>` once GitHub is connected, or paste `lovable-kit/prompt-1A-byte.md`) → **Prompt 1B** (Duolingo details + 21st.dev spin) → 2 (Live Battle) → 3 (polish) → 4 (Notion). Let each finish before sending the next.
 Optional: attach Duolingo + Kahoot screenshots with Prompt 1, captioned "style reference only, don't copy logos, mascots or text" (Euan has them).
 After Prompt 1, open `/admin/import` in the app and upload `questions.csv` (attached, 480 questions from Risu's bank).
 
@@ -379,7 +379,7 @@ Add a **Live Battle** mode for a room of players, using Supabase Realtime. This 
 - **Sounds**: add optional soft sound effects (correct ding, wrong buzz, lesson-complete fanfare, timer tick for the last 5 seconds). Off by default, with a toggle in the profile.
 - **Streak flame**: animated with a flicker loop. Add a "streak freeze" item bought with 200 XP.
 - **Daily goal**: a ring in the right rail that fills as XP comes in. At 100% it bursts into confetti.
-- **Mascot**: **Byte**, a tiny hooded insomniac bird. Do NOT draw him yourself: use the provided `src/components/Byte.tsx` (framer-motion). Usage: `<Byte mood="correct" />`. 13 moods, all vector, no image files: idle, talking, stare, smug, shocked, sad, locked-in, correct, wrong, level-up, coding, out-of-hearts, chest. Full hand-off: `mascot/LOVABLE-BYTE.md`.
+- **Mascot**: **Byte** is already installed at `src/components/Byte.tsx` (added straight after Prompt 1). Never draw, restyle or edit him. Use `<Byte mood="..." />` wherever a mascot appears. 15 moods, all vector: idle, talking, stare, smug, shocked, sad, locked-in, correct, wrong, level-up, coding, out-of-hearts, chest, wave, thinking. Mapping: right answer `correct`, wrong `wrong` (then back to `idle` after ~1.5s), lesson complete `level-up`, no hearts `out-of-hearts`, quiz countdown `locked-in`, boss reveal `shocked`, loading `coding`, streak kept `smug`, streak lost `sad`, /quests `chest`, learner idle 20s `stare`.
 - **Share card**: after a certificate, generate a 1200×630 image ("I just completed Penetration Tester Level 1 on Career Quest 🛡️") to download and share on LinkedIn.
 
 ## PROMPT 4: Notion sync (the sponsor feature)
@@ -410,7 +410,7 @@ Add a dark theme, on by default when `prefers-color-scheme: dark`, plus a toggle
 In dark mode, option cards are transparent with a 2px `--border` border, a 4px bottom lip and 12px radius. Selected = `--selected-fg` border and text. Correct = `--correct-fg`. Buttons keep their bright colours.
 
 ### B. Onboarding that feels like a conversation (for `/start` and `/vibe-check` intros)
-- **Byte** (our mascot) sits top-left with a **speech bubble** whose text types itself out (21st.dev `typing-animation`). CONTINUE stays disabled until the typing finishes.
+- **Byte** (our mascot, already in `src/components/Byte.tsx`) sits top-left with a **speech bubble**. He opens with `<Byte mood="wave" />` on the first line, then `"idle"`. Drive the bubble with Byte's own hook: `const { typed, mouth, mouthShape, done, skip } = useLipSync(line)`, render `typed` in the bubble (click = `skip`) and pass `mouth={mouth} mouthShape={mouthShape}` to `<Byte />`, so his beak moves with the words. Don't use a separate typing component. CONTINUE stays disabled until `done`. Add `followPointer` to this Byte only.
 - A thick progress bar across the top with a ← back arrow.
 - Answer options are cards: icon on the left, bold label. Use a 2-column grid for short lists and a single column for long ones.
 - Add these onboarding screens before the career grid:
@@ -432,7 +432,7 @@ In dark mode, option cards are transparent with a 2px `--border` border, a 4px b
   - Tap one on each side. Matched pairs fade to grey with green sparkles.
   - A wrong pair flashes red and costs a heart.
   - Leave a 400ms lockout after each pair so fast taps don't glitch.
-- **Quit modal** (✕): sad Byte, "Wait, don't go! You'll lose your progress if you quit now", a blue **KEEP LEARNING** button, and a red text-only **END SESSION**.
+- **Quit modal** (✕): `<Byte mood="sad" />`, "Wait, don't go! You'll lose your progress if you quit now", a blue **KEEP LEARNING** button, and a red text-only **END SESSION**.
 
 ### D. Path screen details
 - The **unit header is sticky** at the top of the path column and recolours to match the unit you're scrolled into (green → blue → arena navy). It shows "UNIT 2 · On the Job" plus a guidebook icon button.
@@ -444,7 +444,7 @@ In dark mode, option cards are transparent with a 2px `--border` border, a 4px b
   - **trophy** (unit review)
   - boss (large, navy)
 - Current node: a pulsing ring, plus a **border-beam** effect circling it (21st.dev `border-beam`), and a "START" tooltip.
-- Byte stands beside the path, offset from the zig-zag.
+- `<Byte mood="idle" size={140} />` stands beside the path, offset from the zig-zag.
 - A floating ↑ button at the bottom-right scrolls back to the current lesson.
 
 ### E. Right rail and pages
@@ -466,8 +466,8 @@ Import these from 21st.dev (each page has a **Copy prompt** button to paste here
 | Headings in the arena + landing | `dillionverma/hyper-text` | A "decrypting" scramble effect on reveal, the cyber touch |
 | Arena background | `dillionverma/flickering-grid` | Faint flickering grid on `--arena` instead of the static dot pattern |
 | Career cards on `/start` | `dillionverma/magic-card` | A spotlight follows the cursor in the career's colour |
-| Byte's speech bubble | `dillionverma/typing-animation` | Typed text, CONTINUE unlocks when done |
-| "Byte is thinking" (Vibe Check result) | `ddoemonn/typing-indicator` | Three-dot bubble for 1.2s before the match reveal |
+| Byte's speech bubble | Byte's own `useLipSync` hook (not a 21st.dev component) | Typed text and beak in sync; CONTINUE unlocks when `done` |
+| "Byte is thinking" (Vibe Check result) | `<Byte mood="thinking" />` + `ddoemonn/typing-indicator` | Thinking pose and three-dot bubble for 1.2s before the match reveal |
 | Match reveal | `dillionverma/scratch-to-reveal` | Scratch to reveal your top career card |
 | Onboarding progress | `shadcnspace/stepper-01` | Top step indicator for the onboarding screens |
 | XP, streak, points | `dillionverma/number-ticker` | Numbers roll up |
