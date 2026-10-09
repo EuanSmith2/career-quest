@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { BookOpen, Check, Dumbbell, ExternalLink, Lock, Star, Trophy } from "lucide-react";
-import { useCareer, useLessonProgress, useProfile, useQuestions } from "@/api/hooks";
+import { useCareer, useLessonProgress, useProfile, useQuestions, useUpdateProfile } from "@/api/hooks";
 import type { Career, Question } from "@/api/types";
 import { Byte, type ByteMood } from "@/components/Byte";
 import { CareerBadge } from "@/components/CareerIcon";
@@ -32,6 +32,13 @@ export default function Learn() {
   const [byteMood, setByteMood] = useState<ByteMood>("idle");
   const [guide, setGuide] = useState<number | null>(null);
   const [openKey, setOpenKey] = useState<LessonKey | null>(null);
+
+  const update = useUpdateProfile();
+  const chosen = profile?.chosen_career;
+  const hasProfile = !!profile;
+  useEffect(() => {
+    if (hasProfile && chosen !== slug && CAREERS.some((c) => c.slug === slug)) update.mutate({ chosen_career: slug });
+  }, [hasProfile, chosen, slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const lessons = useMemo(() => sliceLessons(questions.data ?? []), [questions.data]);
   const done = useMemo(() => new Set(progress.data?.map((p) => p.lesson_key)), [progress.data]);
@@ -83,7 +90,7 @@ export default function Learn() {
               </ChunkyButton>
             </div>
 
-            <div className="relative flex flex-col items-center gap-6">
+            <div className="relative flex flex-col items-center gap-10">
               {u.keys.map((k) => {
                 const offset = pathOffset(globalIndex++);
                 const st = stateOf(k);

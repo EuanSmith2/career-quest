@@ -11,7 +11,6 @@ import type {
   Session,
 } from "./types";
 import { CAREERS } from "@/data/careers";
-import { QUESTION_FIXTURES } from "@/data/fixtures/questions";
 import { addDays, HEART_REGEN_MS, localDateKey, MAX_HEARTS, weekStart } from "@/lib/game";
 
 /**
@@ -64,6 +63,9 @@ async function respond<T>(fn: () => T): Promise<T> {
   // structuredClone so callers can't mutate stored state
   return structuredClone(fn());
 }
+
+// The question bank is ~270 KB; load it on first use so it stays out of the main bundle.
+const loadQuestions = () => import("@/data/fixtures/questions").then((m) => m.QUESTION_FIXTURES);
 
 const uid = (prefix: string) => `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
 const nowIso = () => new Date().toISOString();
@@ -241,10 +243,10 @@ export const mockApi: CareerQuestApi = {
   // content
   listCareers: () => respond(() => CAREERS),
 
-  listQuestions: ({ career_slug, difficulty }) =>
-    respond(() =>
-      QUESTION_FIXTURES.filter((q) => q.career_slug === career_slug && (!difficulty || q.difficulty === difficulty)),
-    ),
+  listQuestions: async ({ career_slug, difficulty }) => {
+    const all = await loadQuestions();
+    return respond(() => all.filter((q) => q.career_slug === career_slug && (!difficulty || q.difficulty === difficulty)));
+  },
 
   // profile + progress
   getProfile: () => respond(loadProfile),

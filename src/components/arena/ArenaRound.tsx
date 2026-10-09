@@ -26,7 +26,7 @@ export function ArenaFrame({ children, onExit, className }: { children: ReactNod
   const navigate = useNavigate();
   return (
     <div className={cn("circuit-grid arena-surface fixed inset-0 z-40 overflow-y-auto text-white", className)}>
-      <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3">
+      <div className="sticky top-0 z-10 flex items-center justify-between bg-arena px-4 py-3">
         <button
           type="button"
           onClick={onExit ?? (() => navigate(-1))}

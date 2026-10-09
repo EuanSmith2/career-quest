@@ -36,7 +36,7 @@ export const CertificateCard = forwardRef<HTMLDivElement, { cert: Certificate; c
             </div>
             <div>
               <p className="font-extrabold uppercase text-muted-foreground">Verify ID</p>
-              <p className="break-all font-mono font-bold">{cert.id}</p>
+              <p className="whitespace-nowrap font-mono text-[13px] font-bold">{cert.id}</p>
             </div>
           </div>
           <p className="mt-2 flex items-center gap-1 text-[12px] text-muted-foreground">

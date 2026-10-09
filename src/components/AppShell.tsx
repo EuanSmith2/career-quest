@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { BookOpen, ExternalLink, Flame, Target, Trophy, User } from "lucide-react";
 import { useCareer, useLeaderboard, useProfile, useWeeklyXp } from "@/api/hooks";
@@ -8,6 +8,7 @@ import { CareerBadge } from "./CareerIcon";
 import { Logo } from "./Logo";
 import { ProgressBar } from "./ProgressBar";
 import { StatusRow } from "./StatusChips";
+import { LoadingState } from "./States";
 import { Skeleton } from "./ui/skeleton";
 
 function useNavItems() {
@@ -60,7 +61,10 @@ export function AppShell() {
           <StatusRow className="mx-auto max-w-app" />
         </header>
         <main className="mx-auto w-full max-w-app px-4 pb-28 pt-6 md:pb-12">
-          <Outlet />
+          {/* keep the chrome on screen while a lazy page loads */}
+          <Suspense fallback={<LoadingState />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
 
