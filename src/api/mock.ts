@@ -451,7 +451,7 @@ export const mockApi: CareerQuestApi = {
     await new Promise((r) => setTimeout(r, 1500));
     return Math.random() < 0.2
       ? { ok: false, error: "Notion didn't respond. Try again in a moment." }
-      : { ok: true, page_url: "https://notion.so/mock" };
+      : { ok: true }; // no page_url: there's no real Notion page behind the mock, so the UI shows no link
   },
 
   // live battle (Prompt 2)
@@ -459,6 +459,15 @@ export const mockApi: CareerQuestApi = {
   serverNow: () => Date.now(),
 
   // mock only
+  refillHeartsForDemo: () =>
+    respond(() => {
+      const p = loadProfile();
+      p.hearts = MAX_HEARTS;
+      p.hearts_updated_at = nowIso();
+      write("profile", p);
+      return p;
+    }),
+
   resetDemoData: async () => {
     clearAll();
   },

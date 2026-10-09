@@ -210,6 +210,17 @@ export function useSyncToNotion() {
 
 // ---------- mock only ----------
 
+/** Demo-only "hearts back to 5". null when the API doesn't offer it (the real backend). */
+export function useRefillHeartsForDemo() {
+  const qc = useQueryClient();
+  const refill = api.refillHeartsForDemo;
+  const mutation = useMutation({
+    mutationFn: async () => (refill ? refill() : Promise.reject(new Error("not available"))),
+    onSuccess: (p) => qc.setQueryData(keys.profile, p),
+  });
+  return refill ? mutation : null;
+}
+
 /** Present only when the API implements resetDemoData (the mock). */
 export function useResetDemoData() {
   const qc = useQueryClient();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Flame, Heart, Zap } from "lucide-react";
-import { useCareer, useProfile, useWeeklyXp } from "@/api/hooks";
+import { useCareer, useProfile, useRefillHeartsForDemo, useWeeklyXp } from "@/api/hooks";
 import type { DayXp } from "@/api/types";
 import { CareerIcon } from "./CareerIcon";
 import { NumberTicker } from "./fx/NumberTicker";
@@ -88,6 +88,7 @@ export function XpChip({ xp, className }: { xp: number; className?: string }) {
 export function HeartsChip({ hearts, heartsUpdatedAt, pulse, className }: { hearts: number; heartsUpdatedAt?: string; pulse?: number; className?: string }) {
   const now = useNow();
   const next = heartsUpdatedAt ? msUntilNextHeart(hearts, heartsUpdatedAt, now) : null;
+  const refillDemo = useRefillHeartsForDemo();
   return (
     <Popover>
       <PopoverTrigger className={cn(HUD, hearts > 0 ? "text-red" : "text-disabled-fg", className)} aria-label={`${hearts} hearts`}>
@@ -103,6 +104,11 @@ export function HeartsChip({ hearts, heartsUpdatedAt, pulse, className }: { hear
             ? "You're full. Each wrong answer costs one."
             : `Next heart in ${formatCountdown(next ?? 0)}. Or finish a practice lesson for +1.`}
         </p>
+        {refillDemo && hearts < MAX_HEARTS && (
+          <button type="button" className="mt-2 btn-text text-link" onClick={() => refillDemo.mutate()} disabled={refillDemo.isPending}>
+            Refill to 5 (demo)
+          </button>
+        )}
       </PopoverContent>
     </Popover>
   );

@@ -7,6 +7,7 @@ import {
   useCareer,
   useMyCertificates,
   useProfile,
+  useRefillHeartsForDemo,
   useResetDemoData,
   useSession,
   useSyncToNotion,
@@ -38,6 +39,7 @@ export default function Profile() {
   const update = useUpdateProfile();
   const freeze = useBuyStreakFreeze();
   const reset = useResetDemoData();
+  const refillDemo = useRefillHeartsForDemo();
   const sound = useSound();
   const [theme, setTheme] = useTheme();
   const { openSaveProgress } = useAccountUi();
@@ -251,6 +253,11 @@ export default function Profile() {
         <NotionSync />
       </section>
 
+      {refillDemo && (
+        <ChunkyButton variant="outline" className="self-center" disabled={refillDemo.isPending} onClick={() => refillDemo.mutate()}>
+          ❤️ Refill hearts to 5 (demo)
+        </ChunkyButton>
+      )}
       {reset && (
         <button
           type="button"
@@ -344,7 +351,9 @@ function NotionSync() {
         {sync.isPending
           ? "Syncing your progress to Notion…"
           : sync.data?.ok
-            ? "Synced! Your study plan is in Notion."
+            ? sync.data.page_url
+              ? "Synced! Your study plan is in Notion."
+              : "Synced! (Demo mode: once Notion is connected, this links to your page.)"
             : sync.data
               ? sync.data.error
               : "Send your progress and study plan to Notion."}

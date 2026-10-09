@@ -51,10 +51,11 @@ placeholders, so every career always has 16 easy, 16 medium and 8 hard questions
 | `getQuests` | `/quests`, Daily Quests card in the right rail | Earn the daily goal, 5 right in a row, a lesson at 90%+; computed from today's stats; `resets_at` = local midnight |
 | `listAchievements` | Profile badges grid; "Achievement unlocked" toast | 6 badges computed from progress; `unlocked_at` saved the first time each is earned |
 | `submitQuestionFeedback` | TOO EASY · TOO DIFFICULT · REPORT links on every feedback sheet | Appends to `cq.mock.feedback` |
-| `syncToNotion` | Profile → Sync to Notion | Waits 1.5 s; `{ok:true, page_url}` 4 times in 5, an error 1 time in 5 |
+| `syncToNotion` | Profile → Sync to Notion | Waits 1.5 s; `{ok:true}` with **no** `page_url` 4 times in 5 (no real page exists, so the UI shows no link), an error 1 time in 5. The real backend should return the page's URL; the UI then shows "Open in Notion" |
 | `battle` | Live Battle (Prompt 2) | `{}` placeholder |
 | `serverNow` | Live Battle, if it's built (on hold) | `Date.now()` |
 | `resetDemoData?` | Mock-only link in /profile | Clears every `cq.mock.*` key |
+| `refillHeartsForDemo?` | Mock-only "Refill hearts to 5 (demo)" on Out of hearts, the hearts popover and /profile | Hearts back to 5. Leave it undefined in the real API and the buttons disappear |
 
 ## Rules the backend must enforce
 

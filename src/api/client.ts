@@ -108,4 +108,6 @@ export interface CareerQuestApi {
 
   /** Wipe all demo data. Only the mock implements this; the real backend leaves it undefined. */
   resetDemoData?(): Promise<void>;
+  /** Demo helper: hearts back to 5 so a presenter is never stuck. Only the mock implements this. */
+  refillHeartsForDemo?(): Promise<Profile>;
 }

@@ -10,6 +10,7 @@ import {
   useQuestions,
   useRecordAnswer,
   useRefillHeart,
+  useRefillHeartsForDemo,
   useWeeklyXp,
 } from "@/api/hooks";
 import type { Question } from "@/api/types";
@@ -336,20 +337,34 @@ function OutOfHearts({ slug }: { slug: string }) {
   const navigate = useNavigate();
   const { data: profile } = useProfile();
   const { data: progress } = useLessonProgress(slug);
-  // Replay the most recently finished lesson as practice.
-  const finished = [...(progress ?? [])].filter((p) => p.lesson_key !== "boss").sort((a, b) => b.completed_at.localeCompare(a.completed_at))[0];
+  const refillDemo = useRefillHeartsForDemo();
+  // Practise the most recently finished lesson; with none finished yet, practise the first one
+  // (practice never costs hearts), so this screen is never a dead end.
+  const finished = [...(progress ?? [])]
+    .filter((p) => isLessonKey(p.lesson_key) && p.lesson_key !== "boss")
+    .sort((a, b) => b.completed_at.localeCompare(a.completed_at))[0];
+  const practiceKey = finished?.lesson_key ?? "easy-1";
   return (
     <RoundEnd
       mood="out-of-hearts"
       title="Out of hearts"
       titleClass="text-foreground"
-      subtitle="Practise a lesson you've finished to earn a heart back, or wait for them to refill (1 every 30 minutes)."
+      subtitle="Practice never costs hearts: finish one to earn a heart back. Hearts also refill on their own, 1 every 30 minutes."
       actions={
         <>
-          <ChunkyButton block disabled={!finished} onClick={() => finished && navigate(`/lesson/${slug}/${finished.lesson_key}?practice=1`)}>
+          <ChunkyButton block onClick={() => navigate(`/lesson/${slug}/${practiceKey}?practice=1`)}>
             Practice to refill
           </ChunkyButton>
-          {!finished && <p className="text-caption text-muted-foreground">Finish a lesson first to unlock practice.</p>}
+          {refillDemo && (
+            <ChunkyButton
+              block
+              variant="outline"
+              disabled={refillDemo.isPending}
+              onClick={() => refillDemo.mutate(undefined, { onSuccess: () => navigate(`/learn/${slug}`) })}
+            >
+              ❤️ Refill hearts to 5 (demo)
+            </ChunkyButton>
+          )}
           <ChunkyButton block variant="ghost" onClick={() => navigate(`/learn/${slug}`)}>
             No thanks
           </ChunkyButton>
