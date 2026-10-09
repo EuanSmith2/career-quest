@@ -19,8 +19,8 @@ import { playSound } from "@/lib/sound";
 import { cn } from "@/lib/utils";
 
 const UNITS = [
-  { n: 1 as const, title: "Foundations", body: "The basics every {job} needs.", bg: "bg-correct", lip: "var(--green-lip)", fg: "text-white dark:text-primary-fg" },
-  { n: 2 as const, title: "On the Job", body: "Real situations from a {job}'s week.", bg: "bg-blue", lip: "var(--blue-lip)", fg: "text-white dark:text-primary-fg" },
+  { n: 1 as const, title: "Foundations", body: "The basics every {job} needs.", bg: "bg-blue", lip: "var(--blue-lip)", fg: "text-white dark:text-primary-fg" },
+  { n: 2 as const, title: "On the Job", body: "Real situations from a {job}'s week.", bg: "bg-purple", lip: "var(--purple-lip)", fg: "text-ink-bright" },
   { n: 3 as const, title: "Boss Level", body: "8 hard questions. Get 6 to earn your certificate.", bg: "bg-boss", lip: "var(--boss-lip)", fg: "text-white" },
 ];
 
@@ -149,6 +149,8 @@ export default function Learn() {
         const nodes = PATH.filter((n) => n.unit === unit.n);
         const unitLocked = nodes.every((n) => stateOf(n.key) === "locked");
         const hasCurrent = nodes.some((n) => n.key === current);
+        // Byte stands on the left of the unit's first node, where the zig-zag leaves room
+        const byteAt = 0;
         return (
           <section key={unit.n} ref={(el) => void (unitRefs.current[unit.n - 1] = el)} data-unit={unit.n} className="mb-6" aria-label={`Unit ${unit.n}: ${unit.title}`}>
             {unit.n > 1 && (
@@ -164,8 +166,18 @@ export default function Learn() {
                 const offset = offsets[i % offsets.length];
                 const delay = i++ * 0.04;
                 const st = stateOf(n.key);
+                const byteSize = phone ? 110 : 130;
                 return (
-                  <div key={n.key} ref={n.key === current ? currentRef : undefined}>
+                  <div key={n.key} ref={n.key === current ? currentRef : undefined} className="relative">
+                    {hasCurrent && unit.n !== 3 && n === nodes[byteAt] && (
+                      <div
+                        className="pointer-events-none absolute top-1/2 -translate-y-1/2"
+                        style={{ left: `calc(50% + ${offset - 36 - 16 - byteSize}px)` }}
+                        aria-hidden
+                      >
+                        <Byte mood={byteMood} size={byteSize} />
+                      </div>
+                    )}
                     <PathNodeView
                       node={n}
                       state={st}
@@ -184,11 +196,6 @@ export default function Learn() {
                   </div>
                 );
               })}
-              {hasCurrent && unit.n !== 3 && (
-                <div className="pointer-events-none absolute top-1/3" style={{ left: phone ? "calc(50% + 70px)" : "calc(50% + 110px)" }} aria-hidden>
-                  <Byte mood={byteMood} size={80} />
-                </div>
-              )}
             </div>
 
             <Sheet open={guide === unit.n} onOpenChange={(o) => setGuide(o ? unit.n : null)}>

@@ -23,9 +23,10 @@
     --noise-2: #d4d4d4;
 
     /* brand */
-    --green: #58cc02;
-    --green-lip: #46a302;
-    --green-soft: #d7ffb8;
+    /* no green in the brand: the old green slots now hold blues */
+    --green: #1cb0f6;
+    --green-lip: #1899d6;
+    --green-soft: #ddf4ff;
     --blue: #1cb0f6;
     --blue-lip: #1b99d6;
     --blue-soft: #ddf4ff;
@@ -51,12 +52,12 @@
     --disabled-fg: #afafaf;
 
     /* roles */
-    --primary: var(--green);
-    --primary-lip: var(--green-lip);
+    --primary: #1899d6; /* a deeper blue so white text passes AA */
+    --primary-lip: #1482b8;
     --primary-fg: #ffffff;
-    --correct: #58cc02;
-    --correct-soft: #d7ffb8;
-    --correct-text: #46a302;
+    --correct: #1cb0f6;
+    --correct-soft: #ddf4ff;
+    --correct-text: #1482b8;
     --wrong: #ff4b4b;
     --wrong-soft: #ffdfe0;
     --wrong-text: #ea2b2b;
@@ -106,7 +107,7 @@
     --blue-glow: rgb(28 176 246 / 0.55);
     --blue-ring: rgb(28 176 246 / 0.4);
     --blue-shadow: rgb(28 176 246 / 0.35);
-    --green-soft: rgb(88 204 2 / 0.14);
+    --green-soft: rgb(28 176 246 / 0.14);
     --red-soft: rgb(255 75 75 / 0.14);
     --gold-lip: #b38f00;
     --disabled-bg: #1c1c1e;
@@ -118,9 +119,9 @@
     --ink-bright: #000000;
     --flame: #ff9600;
     --gold: #ffc800;
-    --correct: #58cc02;
-    --correct-soft: rgb(88 204 2 / 0.14);
-    --correct-text: #6fe010;
+    --correct: #1cb0f6;
+    --correct-soft: rgb(28 176 246 / 0.14);
+    --correct-text: #8fd8fb;
     --wrong: #ff4b4b;
     --wrong-soft: rgb(255 75 75 / 0.14);
     --wrong-text: #ff6b6b;

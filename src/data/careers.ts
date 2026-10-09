@@ -68,7 +68,7 @@ export const CAREERS: Career[] = [
     name: "DevSecOps",
     job_title: "DevSecOps Engineer",
     icon: "Terminal",
-    color: "#58a700",
+    color: "#d98c4a", // copper (no green in the brand)
     one_liner: "Build security into how code ships",
     day_to_day: "Add scanners and checks to CI/CD pipelines, secure containers and dependencies",
     tools: "GitHub Actions, Docker, Kubernetes, SAST tools",
@@ -92,7 +92,7 @@ export const CAREERS: Career[] = [
     name: "Security Engineer",
     job_title: "Security Engineer",
     icon: "Shield",
-    color: "#58cc02",
+    color: "#6d7cff", // indigo
     one_liner: "Design systems that are secure from the start",
     day_to_day: "Harden servers, run identity and access, automate controls, fix weak spots",
     tools: "Hardening guides, IAM, scripting, cloud",
@@ -128,7 +128,7 @@ export const CAREERS: Career[] = [
     name: "Embedded Systems Security",
     job_title: "IoT & Embedded Security Engineer",
     icon: "Cpu",
-    color: "#00cd9c",
+    color: "#9aa5b8", // steel
     one_liner: "Secure smart devices, cars and machines",
     day_to_day: "Test firmware and hardware, secure device updates, protect industrial systems",
     tools: "Firmware analysis, UART/JTAG, OWASP IoT guide",
