@@ -53,7 +53,7 @@ export function MatchPairs({ careerSlug, onMistake, onDone }: { careerSlug: stri
     onPick: (k) => (k < 5 ? left[k] && tap("l", left[k]) : right[k - 5] && tap("r", right[k - 5])),
   });
 
-  const cell = (side: "l" | "r", c: PairCard, n: number) => {
+  const cell = (side: "l" | "r", c: PairCard) => {
     const key = `${side}:${c.slug}`;
     const isMatched = matched.has(c.slug);
     const isSel = sel?.side === side && sel.slug === c.slug;
@@ -66,7 +66,7 @@ export function MatchPairs({ careerSlug, onMistake, onDone }: { careerSlug: stri
         disabled={isMatched}
         onClick={() => tap(side, c)}
         className={cn(
-          "chunky relative flex min-h-[64px] w-full items-center rounded-card border-2 py-2 pl-3 pr-9 text-left font-bold leading-snug",
+          "chunky relative flex min-h-[64px] w-full items-center rounded-card border-2 px-3 py-2 text-left font-bold leading-snug",
           side === "l" ? "text-body" : "text-caption",
           isMatched
             ? "border-border bg-muted text-disabled-fg"
@@ -80,9 +80,6 @@ export function MatchPairs({ careerSlug, onMistake, onDone }: { careerSlug: stri
         aria-pressed={isSel}
       >
         <span className="break-words">{c.text}</span>
-        <span className="absolute bottom-2 right-2 grid h-6 w-6 place-items-center rounded-lg border-2 border-border text-[12px] font-extrabold text-muted-foreground" aria-hidden>
-          {n % 10}
-        </span>
       </button>
     );
   };
@@ -91,8 +88,8 @@ export function MatchPairs({ careerSlug, onMistake, onDone }: { careerSlug: stri
     <div>
       <h1 className="mb-6 text-[24px] font-bold leading-[32px] sm:text-[32px] sm:leading-[40px]">Match the job</h1>
       <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-3">{left.map((c, i) => cell("l", c, i + 1))}</div>
-        <div className="flex flex-col gap-3">{right.map((c, i) => cell("r", c, i + 6))}</div>
+        <div className="flex flex-col gap-3">{left.map((c) => cell("l", c))}</div>
+        <div className="flex flex-col gap-3">{right.map((c) => cell("r", c))}</div>
       </div>
     </div>
   );

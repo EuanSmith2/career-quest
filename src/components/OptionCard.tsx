@@ -18,23 +18,22 @@ const STATES: Record<OptionState, { className: string; badge: string; lip: strin
 };
 
 export interface OptionCardProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> {
-  index: number; // 0-based; the keyboard key shown is index + 1 (10th = 0)
+  index: number; // 0-based; keys 1–4 still pick it, no badge is shown
   state?: OptionState;
   icon?: React.ReactNode;
-  hideKey?: boolean;
   children: React.ReactNode;
 }
 
-/** An answer card: optional icon chip, bold label, number-key badge bottom-right. Long answers wrap. */
-export function OptionCard({ index, state = "idle", icon, hideKey, className, style, children, ...props }: OptionCardProps) {
+/** An answer card: optional icon chip and a bold label. Long answers wrap. */
+export function OptionCard({ index, state = "idle", icon, className, style, children, ...props }: OptionCardProps) {
   const s = STATES[state];
   return (
     <button
       type="button"
       aria-pressed={state === "selected"}
+      data-key={index + 1}
       className={cn(
-        "chunky relative flex w-full items-center gap-3 rounded-card border-2 py-3 pl-3 text-left text-body font-bold",
-        hideKey ? "pr-3" : "pr-10",
+        "chunky relative flex w-full items-center gap-3 rounded-card border-2 p-3 text-left text-body font-bold",
         state === "wrong" && "animate-shake",
         s.className,
         className,
@@ -53,14 +52,6 @@ export function OptionCard({ index, state = "idle", icon, hideKey, className, st
         </span>
       )}
       <span className="min-w-0 flex-1 break-words">{children}</span>
-      {!hideKey && (
-        <span
-          className={cn("absolute bottom-2 right-2 grid h-6 w-6 place-items-center rounded-lg border-2 text-[12px] font-extrabold", s.badge)}
-          aria-hidden
-        >
-          {(index + 1) % 10}
-        </span>
-      )}
     </button>
   );
 }
