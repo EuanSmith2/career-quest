@@ -36,7 +36,7 @@ Everything that looked like a live quiz show becomes a Duolingo-style screen.
 ### Phase 3 · Onboarding as a conversation
 - [x] Byte top-left with a typing speech bubble; CONTINUE unlocks when typing ends
 - [x] Top progress bar + back arrow (stepper)
-- [x] Screens: How much cyber do you know (signal bars) → daily goal → what you'll achieve → start from scratch / find my level → career grid
+- [x] Screens: How much cyber do you know (signal bars) → daily goal → what you'll achieve → career choice ("start from scratch / find my level" removed 9 Oct; JUMP HERE? on the path still offers the test-out)
 - [x] Saves `starting_level` and `daily_goal_xp` via `updateProfile`
 
 ### Phase 4 · Lesson details

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BookOpen, Brain, Compass, Flame, Swords } from "lucide-react";
+import { Brain, Flame, Swords } from "lucide-react";
 import { useCareers, useProfile, useUpdateProfile } from "@/api/hooks";
 import type { Profile } from "@/api/types";
 import { CareerIcon } from "@/components/CareerIcon";
@@ -36,7 +36,7 @@ function SignalBars({ lit }: { lit: number }) {
   );
 }
 
-type Step = "level" | "goal" | "achieve" | "place" | "career";
+type Step = "level" | "goal" | "achieve" | "career";
 
 /**
  * Onboarding as a conversation with Byte, then "What do you want to be?".
@@ -50,14 +50,12 @@ export default function Start() {
   const update = useUpdateProfile();
   const [level, setLevel] = useState<number | null>(null);
   const [goal, setGoal] = useState<Profile["daily_goal_xp"] | null>(null);
-  const [placement, setPlacement] = useState<"scratch" | "find" | null>(null);
   const [step, setStep] = useState<Step | null>(null);
   const [knows, setKnows] = useState(false); // "I already know what career I want" → show the grid
 
   if (isLoading) return <LoadingState className="mx-auto max-w-app px-4" />;
   const current: Step = step ?? (params.get("pick") === "1" || profile?.chosen_career ? "career" : "level");
-  const offerPlacement = (level ?? 0) >= 3;
-  const order: Step[] = offerPlacement ? ["level", "goal", "achieve", "place", "career"] : ["level", "goal", "achieve", "career"];
+  const order: Step[] = ["level", "goal", "achieve", "career"];
   const at = order.indexOf(current);
   const go = (s: Step) => setStep(s);
   const back = () => (at <= 0 ? navigate("/") : go(order[at - 1]));
@@ -65,8 +63,7 @@ export default function Start() {
 
   const pickCareer = (slug: string) => {
     update.mutate({ chosen_career: slug });
-    // straight to the path; only players who chose "Find my level" take the placement test
-    navigate(placement === "find" ? `/test-out/${slug}/1?placement=1` : `/learn/${slug}`);
+    navigate(`/learn/${slug}`); // straight to the path, no quiz
   };
 
   if (current === "level")
@@ -119,39 +116,6 @@ export default function Start() {
             </motion.li>
           ))}
         </ul>
-      </Conversation>
-    );
-
-  if (current === "place")
-    return (
-      <Conversation step={4} steps={order.length} line="Now let's find the best place to start" onBack={back} canContinue={placement !== null} onContinue={forward}>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[
-            { id: "scratch" as const, icon: BookOpen, title: "Start from scratch", body: "Take the first lesson" },
-            { id: "find" as const, icon: Compass, title: "Find my level", body: "Take a quick test and skip ahead" },
-          ].map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => {
-                setPlacement(c.id);
-                playSound("select");
-              }}
-              aria-pressed={placement === c.id}
-              className={cn(
-                "chunky flex flex-col items-center gap-3 rounded-card border-2 px-4 py-8 text-center transition-transform",
-                placement === c.id
-                  ? "-translate-y-1 border-blue-border bg-blue-soft text-selected-fg shadow-[0_0_0_1px_var(--blue-ring),0_10px_30px_var(--blue-shadow)]"
-                  : "border-border bg-background",
-              )}
-              style={{ "--lip-color": placement === c.id ? "var(--blue-lip)" : "var(--border-deep)" } as React.CSSProperties}
-            >
-              <c.icon className="h-12 w-12 text-blue" strokeWidth={2} />
-              <span className="text-[19px] font-extrabold">{c.title}</span>
-              <span className="text-caption text-muted-foreground">{c.body}</span>
-            </button>
-          ))}
-        </div>
       </Conversation>
     );
 
