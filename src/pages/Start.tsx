@@ -64,7 +64,8 @@ export default function Start() {
 
   const pickCareer = (slug: string) => {
     update.mutate({ chosen_career: slug });
-    navigate(placement === "find" ? `/test-out/${slug}/1?placement=1` : `/warmup/${slug}`);
+    // straight to the path; only players who chose "Find my level" take the placement test
+    navigate(placement === "find" ? `/test-out/${slug}/1?placement=1` : `/learn/${slug}`);
   };
 
   if (current === "level")
