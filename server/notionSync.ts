@@ -59,7 +59,7 @@ export async function syncToNotion(payload: NotionSyncPayload, env: NotionEnv): 
   const token = env.NOTION_TOKEN?.trim();
   const rawDb = env.NOTION_DATABASE_ID?.trim();
   if (!token || !rawDb) {
-    return { status: 501, body: { ok: false, error: "Notion isn't connected yet. Add NOTION_TOKEN and NOTION_DATABASE_ID to .env.local." } };
+    return { status: 501, body: { ok: false, error: "Notion isn't connected yet. Add NOTION_TOKEN and NOTION_DATABASE_ID (in .env.local, or the Vercel project's environment variables)." } };
   }
   const db = normaliseDatabaseId(rawDb);
 

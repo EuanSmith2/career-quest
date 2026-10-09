@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { syncToNotion, type NotionSyncPayload } from "../server/notionSync";
+import { syncToNotion, type NotionSyncPayload } from "../server/notionSync.js"; // .js: Node ESM on Vercel needs the extension
 
 /**
  * Vercel serverless function: POST /api/notion-sync (same handler as the Vite dev/preview middleware).
