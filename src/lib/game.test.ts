@@ -18,6 +18,7 @@ import {
   pickMeetTheJobs,
   pickPairs,
   pickTestOut,
+  unitLessonKeys,
   rankVibeCheck,
   shuffleOptions,
   sliceLessons,
@@ -92,7 +93,7 @@ describe("sliceLessons", () => {
   it("gives every career a full path from the fixtures", () => {
     for (const c of CAREERS) {
       const l = sliceLessons(QUESTION_FIXTURES.filter((x) => x.career_slug === c.slug));
-      for (const [key, list] of Object.entries(l)) expect(list.length, `${c.slug} ${key}`).toBe(key === "boss" ? 8 : 4);
+      for (const [key, list] of Object.entries(l)) expect(list.length, `${c.slug} ${key}`).toBe(key === "boss" ? 8 : key.startsWith("review") ? 16 : 4);
     }
   });
 });
@@ -100,7 +101,9 @@ describe("sliceLessons", () => {
 describe("path helpers", () => {
   it("finds the current lesson", () => {
     expect(currentLesson([])).toBe("easy-1");
-    expect(currentLesson(["easy-1", "easy-2", "easy-3", "easy-4"])).toBe("medium-1");
+    expect(currentLesson(["easy-1", "easy-2"])).toBe("chest-u1");
+    expect(currentLesson(["easy-1", "easy-2", "chest-u1", "easy-3", "easy-4"])).toBe("review-1");
+    expect(currentLesson(unitLessonKeys(1).concat("chest-u1"))).toBe("medium-1");
   });
   it("describes a lesson's position", () => {
     expect(lessonPosition("easy-2")).toEqual({ unit: 1, index: 2, of: 4 });

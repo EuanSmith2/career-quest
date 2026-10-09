@@ -46,7 +46,7 @@ export function OptionCard({ index, state = "idle", icon, hideKey, className, st
         <span
           className={cn(
             "grid h-8 w-8 shrink-0 place-items-center rounded-[9px]",
-            state === "selected" ? "bg-blue text-primary-fg" : "bg-muted text-muted-icon",
+            state === "selected" ? "bg-blue text-primary-fg [--bars-on:currentColor]" : "bg-muted text-muted-icon",
           )}
         >
           {icon}

@@ -28,16 +28,16 @@ Everything that looked like a live quiz show becomes a Duolingo-style screen.
 - [x] `[data-theme="midnight"]` tokens from 1B §A; Light theme kept behind a toggle in /profile (`cq.theme`)
 - [x] Tailwind `darkMode: ['selector', '[data-theme="midnight"]']`; primary actions blue with black text
 - [x] Midnight cards/options: 14px radius, icon chip, picked = lift + blue glow; dimmed 0.35
-- [ ] Path nodes 72×66 with 8px lip; done = primary blue; locked = dark grey
+- [x] Path nodes 72×66 with 8px lip; done = primary blue; locked = dark grey
 - [x] Fonts: Instrument Serif italic (one accent word per headline), JetBrains Mono (fine print), wordmark
-- [ ] Blur-in reveals, 0.6s crossfades, reduced-motion = fade only
+- [x] Blur-in reveals, 0.6s crossfades, reduced-motion = fade only
 - [x] `it_security` colour → `#e6b400`; SHORT_NAMES updated
 
 ### Phase 3 · Onboarding as a conversation
-- [ ] Byte top-left with a typing speech bubble; CONTINUE unlocks when typing ends
-- [ ] Top progress bar + back arrow (stepper)
-- [ ] Screens: How much cyber do you know (signal bars) → daily goal → what you'll achieve → start from scratch / find my level → career grid
-- [ ] Saves `starting_level` and `daily_goal_xp` via `updateProfile`
+- [x] Byte top-left with a typing speech bubble; CONTINUE unlocks when typing ends
+- [x] Top progress bar + back arrow (stepper)
+- [x] Screens: How much cyber do you know (signal bars) → daily goal → what you'll achieve → start from scratch / find my level → career grid
+- [x] Saves `starting_level` and `daily_goal_xp` via `updateProfile`
 
 ### Phase 4 · Lesson details
 - [x] Coloured tag with icon (NEW CONCEPT / HARD), 32px question, number-key badges bottom-right
@@ -48,32 +48,32 @@ Everything that looked like a live quiz show becomes a Duolingo-style screen.
 - [x] Quit modal copy from 1B
 
 ### Phase 5 · Path details
-- [ ] Sticky unit header that recolours per unit; divider labels between units
-- [ ] JUMP HERE? node at each locked unit → 6-question test-out, 5/6 unlocks (same flow as "Find my level")
-- [ ] Node types: lesson · chest (+20 XP after lesson 2) · trophy (unit review) · final test
-- [ ] Border beam on the current node; floating ↑ button back to it
-- [ ] API: `claimChest`, `unlockUnit`
+- [x] Sticky unit header that recolours per unit; divider labels between units
+- [x] JUMP HERE? node at each locked unit → 6-question test-out, 5/6 unlocks (same flow as "Find my level")
+- [x] Node types: lesson · chest (+20 XP after lesson 2) · trophy (unit review) · final test
+- [x] Border beam on the current node; floating ↑ button back to it
+- [x] API: `claimChest`, `unlockUnit`
 
 ### Phase 6 · Rail, quests, leaderboard
 - [x] Number tickers; stat popovers (streak calendar, XP history, heart timer)
-- [ ] Unlock Leaderboards card (until 3 lessons), sign-up nudge for guests
-- [ ] Daily Quests card + `/quests` page (Byte with chest, monthly challenge badge)
-- [ ] Leaderboard locked state (3 league shields over grey rows)
-- [ ] API: quests "Earn 30 XP", "Get 5 in a row right", "Finish a lesson with 90%+"
+- [x] Unlock Leaderboards card (until 3 lessons), sign-up nudge for guests
+- [x] Daily Quests card + `/quests` page (Byte with chest, monthly challenge badge)
+- [x] Leaderboard locked state (3 league shields over grey rows)
+- [x] API: quests "Earn 30 XP", "Get 5 in a row right", "Finish a lesson with 90%+"
 
 ### Phase 7 · Landing in Midnight
-- [ ] Jargon "noise" backdrop, headline "You want a job in cyber. Where do you even start?"
-- [ ] Optional once-per-session intro (blue dot → wipe), skipped for reduced motion
-- [ ] Three split sections with mini demos; closing block with Byte waving and the wordmark
-- [ ] Orbiting career icons, marquee career strip
+- [x] Jargon "noise" backdrop, headline "You want a job in cyber. Where do you even start?"
+- [x] Optional once-per-session intro (blue dot → wipe), skipped for reduced motion
+- [x] Three split sections with mini demos; closing block with Byte waving and the wordmark
+- [x] Orbiting career icons, marquee career strip
 
 ### Phase 8 · Profile + achievements
-- [ ] Points chart, achievements grid, "Achievement unlocked" toast
-- [ ] API: `listAchievements`
+- [x] XP chart, achievements grid, "Achievement unlocked" toast
+- [x] API: `listAchievements`
 
 ### Phase 9 · Wrap-up
-- [ ] Update `HANDOFF.md` with new API methods and states
-- [ ] Walkthrough on 390px / tablet / desktop in both themes, reduced motion on
+- [x] Update `HANDOFF.md` with new API methods and states
+- [x] Walkthrough on 390px / tablet / desktop in both themes, reduced motion on
 
 ## Later prompts
 - **Prompt 2 Live Battle**: on hold. It was a Kahoot-style host screen + PIN join, which conflicts with "kill the Kahoot". Needs a team decision before building

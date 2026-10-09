@@ -1,4 +1,5 @@
 import type {
+  Achievement,
   AnswerRecord,
   BattleApi,
   Career,
@@ -58,6 +59,10 @@ export interface CareerQuestApi {
   }): Promise<{ profile: Profile; xp_bonus: number }>;
   /** Completed lessons for a career (one row per lesson_key). */
   listLessonProgress(career_slug: string): Promise<LessonProgress[]>;
+  /** Open a path chest (lesson_key "chest-u1" / "chest-u2"): +20 XP once, recorded as a progress row. */
+  claimChest(p: { career_slug: string; chest_key: string }): Promise<{ profile: Profile; xp: number }>;
+  /** A passed test-out (5/6) or "Find my level": mark every lesson in the unit done. Must verify the pass server-side. */
+  unlockUnit(p: { career_slug: string; unit: 1 | 2; accuracy: number }): Promise<LessonProgress[]>;
   /** +1 heart (max 5) after a finished practice lesson. */
   refillHeartByPractice(): Promise<Profile>;
   /** Spend 200 XP for one streak freeze. Must reject if the user has < 200 XP. */
@@ -78,8 +83,10 @@ export interface CareerQuestApi {
   getWeeklyLeaderboard(): Promise<LeaderboardRow[]>;
   /** The caller's XP per day for the last 7 days, oldest first. */
   getWeeklyXp(): Promise<DayXp[]>;
-  /** Today's quests with progress. */
+  /** Today's quests with progress: earn the daily goal, 5 right in a row, a lesson at 90%+. */
   getQuests(): Promise<Quest[]>;
+  /** Badges with progress; unlocked_at is set the first time each is earned. */
+  listAchievements(): Promise<Achievement[]>;
 
   // ---------- crowd-verification ----------
 

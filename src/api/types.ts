@@ -98,6 +98,17 @@ export interface Quest {
   target: number;
   reward_xp: number;
   claimed: boolean;
+  resets_at: string; // ISO; daily quests refresh at local midnight
+}
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string; // emoji
+  progress: number;
+  target: number;
+  unlocked_at: string | null;
 }
 
 export type FeedbackKind =

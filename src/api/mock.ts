@@ -1,5 +1,6 @@
 import type { CareerQuestApi } from "./client";
 import type {
+  Achievement,
   AnswerRecord,
   Certificate,
   DayXp,
@@ -11,7 +12,7 @@ import type {
   Session,
 } from "./types";
 import { CAREERS } from "@/data/careers";
-import { addDays, HEART_REGEN_MS, localDateKey, MAX_HEARTS, weekStart } from "@/lib/game";
+import { addDays, CHEST_XP, HEART_REGEN_MS, localDateKey, MAX_HEARTS, unitLessonKeys, weekStart } from "@/lib/game";
 
 /**
  * Working mock of CareerQuestApi: localStorage + in-memory, 150–400 ms simulated latency.
@@ -85,6 +86,16 @@ interface DayStats {
   answered: number;
   lessons: number;
   xp: number;
+  run: number; // current correct-in-a-row
+  bestRun: number;
+  bestAccuracy: number; // best lesson accuracy today
+}
+const emptyDay = (date: string): DayStats => ({ date, answered: 0, lessons: 0, xp: 0, run: 0, bestRun: 0, bestAccuracy: 0 });
+
+function today(): DayStats {
+  const d = localDateKey();
+  const s = read<DayStats>("today", emptyDay(d));
+  return s.date === d ? { ...emptyDay(d), ...s } : emptyDay(d);
 }
 
 // ---------- profile rules ----------
@@ -152,14 +163,23 @@ function loadProfile(): Profile {
   return p;
 }
 
-function bumpToday(patch: Partial<Omit<DayStats, "date">>) {
-  const today = localDateKey();
-  let s = read<DayStats>("today", { date: today, answered: 0, lessons: 0, xp: 0 });
-  if (s.date !== today) s = { date: today, answered: 0, lessons: 0, xp: 0 };
+function bumpToday(patch: { answered?: number; lessons?: number; xp?: number; correct?: boolean; accuracy?: number }) {
+  const s = today();
   s.answered += patch.answered ?? 0;
   s.lessons += patch.lessons ?? 0;
   s.xp += patch.xp ?? 0;
+  if (patch.correct !== undefined) {
+    s.run = patch.correct ? s.run + 1 : 0;
+    s.bestRun = Math.max(s.bestRun, s.run);
+  }
+  if (patch.accuracy !== undefined) s.bestAccuracy = Math.max(s.bestAccuracy, patch.accuracy);
   write("today", s);
+}
+
+function nextMidnight(): string {
+  const d = new Date();
+  d.setHours(24, 0, 0, 0);
+  return d.toISOString();
 }
 
 function addXp(p: Profile, amount: number) {
@@ -267,7 +287,7 @@ export const mockApi: CareerQuestApi = {
         if (p.hearts === MAX_HEARTS) p.hearts_updated_at = nowIso(); // regen clock starts on the first lost heart
         p.hearts -= 1;
       }
-      bumpToday({ answered: 1 });
+      bumpToday({ answered: 1, correct: a.correct });
       write("profile", p);
       return p;
     }),
@@ -288,8 +308,31 @@ export const mockApi: CareerQuestApi = {
       }
       write("progress", all);
       write("profile", p);
-      bumpToday({ lessons: 1 });
+      bumpToday({ lessons: 1, accuracy });
       return { profile: p, xp_bonus };
+    }),
+
+  claimChest: ({ career_slug, chest_key }) =>
+    respond(() => {
+      const p = loadProfile();
+      const all = read<LessonProgress[]>("progress", []);
+      if (all.some((r) => r.career_slug === career_slug && r.lesson_key === chest_key)) return { profile: p, xp: 0 };
+      addXp(p, CHEST_XP);
+      all.push({ career_slug, lesson_key: chest_key, completed_at: nowIso(), best_accuracy: 100 });
+      write("progress", all);
+      write("profile", p);
+      return { profile: p, xp: CHEST_XP };
+    }),
+
+  unlockUnit: ({ career_slug, unit, accuracy }) =>
+    respond(() => {
+      const all = read<LessonProgress[]>("progress", []);
+      for (const key of unitLessonKeys(unit)) {
+        if (!all.some((r) => r.career_slug === career_slug && r.lesson_key === key))
+          all.push({ career_slug, lesson_key: key, completed_at: nowIso(), best_accuracy: accuracy });
+      }
+      write("progress", all);
+      return all.filter((r) => r.career_slug === career_slug);
     }),
 
   listLessonProgress: (career_slug) =>
@@ -364,15 +407,37 @@ export const mockApi: CareerQuestApi = {
   getQuests: () =>
     respond(() => {
       const p = loadProfile();
-      const today = localDateKey();
-      const s = read<DayStats>("today", { date: today, answered: 0, lessons: 0, xp: 0 });
-      const t = s.date === today ? s : { date: today, answered: 0, lessons: 0, xp: 0 };
+      const t = today();
+      const resets_at = nextMidnight();
       const quests: Quest[] = [
-        { id: "daily-xp", title: `Earn ${p.daily_goal_xp} XP`, progress: Math.min(t.xp, p.daily_goal_xp), target: p.daily_goal_xp, reward_xp: 10, claimed: false },
-        { id: "daily-lessons", title: "Complete 2 lessons", progress: Math.min(t.lessons, 2), target: 2, reward_xp: 15, claimed: false },
-        { id: "daily-answers", title: "Answer 10 questions", progress: Math.min(t.answered, 10), target: 10, reward_xp: 10, claimed: false },
+        { id: "daily-xp", title: `Earn ${p.daily_goal_xp} XP`, progress: Math.min(t.xp, p.daily_goal_xp), target: p.daily_goal_xp, reward_xp: 10, claimed: false, resets_at },
+        { id: "daily-run", title: "Get 5 in a row right", progress: Math.min(t.bestRun, 5), target: 5, reward_xp: 15, claimed: false, resets_at },
+        { id: "daily-90", title: "Finish a lesson with 90%+", progress: t.bestAccuracy >= 90 ? 1 : 0, target: 1, reward_xp: 15, claimed: false, resets_at },
       ];
       return quests;
+    }),
+
+  listAchievements: () =>
+    respond(() => {
+      const p = loadProfile();
+      const progress = read<LessonProgress[]>("progress", []);
+      const certs = read<Certificate[]>("certs", []).filter((c) => c.user_id === p.user_id);
+      const lessons = progress.filter((r) => !r.lesson_key.startsWith("chest"));
+      const chests = progress.filter((r) => r.lesson_key.startsWith("chest")).length;
+      const perfect = lessons.some((r) => r.best_accuracy === 100) ? 1 : 0;
+      const defs: Omit<Achievement, "unlocked_at">[] = [
+        { id: "first-lesson", title: "First steps", description: "Finish your first lesson", icon: "🎯", progress: Math.min(lessons.length, 1), target: 1 },
+        { id: "perfect", title: "Flawless", description: "Finish a lesson with no mistakes", icon: "💎", progress: perfect, target: 1 },
+        { id: "streak-3", title: "On fire", description: "Reach a 3 day streak", icon: "🔥", progress: Math.min(p.streak, 3), target: 3 },
+        { id: "xp-100", title: "Century", description: "Earn 100 XP", icon: "⚡", progress: Math.min(p.xp, 100), target: 100 },
+        { id: "chest", title: "Treasure hunter", description: "Open a chest on the path", icon: "🎁", progress: Math.min(chests, 1), target: 1 },
+        { id: "boss", title: "Boss slayer", description: "Pass a Boss Level", icon: "🏆", progress: Math.min(certs.length, 1), target: 1 },
+      ];
+      // remember when each was first earned
+      const seen = read<Record<string, string>>("achievements", {});
+      for (const d of defs) if (d.progress >= d.target && !seen[d.id]) seen[d.id] = nowIso();
+      write("achievements", seen);
+      return defs.map((d) => ({ ...d, unlocked_at: seen[d.id] ?? null }));
     }),
 
   // crowd-verification

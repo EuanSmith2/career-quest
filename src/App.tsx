@@ -5,6 +5,8 @@ import { MotionConfig } from "framer-motion";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { AccountUiProvider } from "@/components/AccountSheets";
 import { AppShell } from "@/components/AppShell";
+import { Toaster } from "@/components/Toast";
+import { AchievementWatcher } from "@/components/AchievementWatcher";
 import { GuestGate } from "@/components/GuestGate";
 import { useProfile } from "@/api/hooks";
 import { LoadingState } from "@/components/States";
@@ -16,6 +18,8 @@ const Warmup = lazy(() => import("@/pages/Warmup"));
 const Learn = lazy(() => import("@/pages/Learn"));
 const Lesson = lazy(() => import("@/pages/Lesson"));
 const Boss = lazy(() => import("@/pages/Boss"));
+const TestOut = lazy(() => import("@/pages/TestOut"));
+const Quests = lazy(() => import("@/pages/Quests"));
 const CertificatePage = lazy(() => import("@/pages/Certificate"));
 const CertificateVerify = lazy(() => import("@/pages/CertificateVerify"));
 const Leaderboard = lazy(() => import("@/pages/Leaderboard"));
@@ -54,12 +58,14 @@ export default function App() {
                     <Route path="/warmup/:career" element={<Warmup />} />
                     <Route path="/lesson/:career/:lessonKey" element={<Lesson />} />
                     <Route path="/boss/:career" element={<Boss />} />
+                    <Route path="/test-out/:career/:unit" element={<TestOut />} />
 
                     <Route element={<AppShell />}>
                       <Route path="/learn" element={<LearnIndex />} />
                       <Route path="/learn/:career" element={<Learn />} />
                       <Route path="/certificate/:career" element={<CertificatePage />} />
                       <Route path="/leaderboard" element={<Leaderboard />} />
+                      <Route path="/quests" element={<Quests />} />
                       <Route path="/profile" element={<Profile />} />
                     </Route>
                   </Route>
@@ -67,6 +73,8 @@ export default function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
+              <Toaster />
+              <AchievementWatcher />
             </AccountUiProvider>
           </BrowserRouter>
         </TooltipProvider>

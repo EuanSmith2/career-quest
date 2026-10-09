@@ -24,7 +24,7 @@ import { HeartsChip, WeekDots } from "@/components/StatusChips";
 import { ErrorState, LoadingState } from "@/components/States";
 import { CAREERS } from "@/data/careers";
 import { celebrate } from "@/lib/confetti";
-import { formatDuration, isLessonKey, lessonAccuracy, shuffleOptions, sliceLessons } from "@/lib/game";
+import { formatDuration, isLessonKey, lessonAccuracy, pickTestOut, REVIEW_SIZE, shuffleOptions, sliceLessons } from "@/lib/game";
 import { playSound } from "@/lib/sound";
 import { useAnswerKeys } from "@/lib/useKeys";
 
@@ -69,7 +69,9 @@ export default function Lesson() {
   );
 }
 
-function LessonPlayer({ slug, lessonKey, practice, questions, startHearts }: { slug: string; lessonKey: string; practice: boolean; questions: Question[]; startHearts: number }) {
+function LessonPlayer({ slug, lessonKey, practice, questions: pool, startHearts }: { slug: string; lessonKey: string; practice: boolean; questions: Question[]; startHearts: number }) {
+  // a unit review (trophy node) samples REVIEW_SIZE questions from the whole unit
+  const [questions] = useState(() => (lessonKey.startsWith("review") ? pickTestOut(pool, REVIEW_SIZE) : pool));
   const navigate = useNavigate();
   const { data: career } = useCareer(slug);
   const { data: profile } = useProfile();
@@ -79,7 +81,7 @@ function LessonPlayer({ slug, lessonKey, practice, questions, startHearts }: { s
 
   const [steps, setSteps] = useState<Step[]>(() => {
     const s: Step[] = questions.map((q) => ({ kind: "question", q }));
-    s.splice(Math.min(PAIRS_AT, s.length), 0, { kind: "pairs" });
+    if (!lessonKey.startsWith("review")) s.splice(Math.min(PAIRS_AT, s.length), 0, { kind: "pairs" });
     return s;
   });
   const [index, setIndex] = useState(0);
@@ -179,7 +181,7 @@ function LessonPlayer({ slug, lessonKey, practice, questions, startHearts }: { s
 
   if (stage === "out-of-hearts") return <OutOfHearts slug={slug} />;
   if (stage === "complete" && summary)
-    return <LessonComplete summary={summary} practice={practice} onContinue={() => (practice ? navigate(`/learn/${slug}`) : setStage("streak"))} />;
+    return <LessonComplete summary={summary} practice={practice} review={lessonKey.startsWith("review")} onContinue={() => (practice ? navigate(`/learn/${slug}`) : setStage("streak"))} />;
   if (stage === "streak") return <StreakScreen onContinue={() => navigate(`/learn/${slug}`)} />;
   if (!step) return null;
 
@@ -270,7 +272,7 @@ function LessonPlayer({ slug, lessonKey, practice, questions, startHearts }: { s
   );
 }
 
-function LessonComplete({ summary, practice, onContinue }: { summary: { xp: number; accuracy: number; ms: number; perfect: boolean }; practice: boolean; onContinue: () => void }) {
+function LessonComplete({ summary, practice, review, onContinue }: { summary: { xp: number; accuracy: number; ms: number; perfect: boolean }; practice: boolean; review: boolean; onContinue: () => void }) {
   useEffect(() => {
     playSound("lesson-complete");
     celebrate(summary.perfect);
@@ -278,7 +280,7 @@ function LessonComplete({ summary, practice, onContinue }: { summary: { xp: numb
   return (
     <RoundEnd
       mood={summary.perfect ? "smug" : "level-up"}
-      title={practice ? "Practice complete!" : summary.perfect ? "Perfect lesson!" : "Lesson complete!"}
+      title={practice ? "Practice complete!" : review ? "Unit review complete!" : summary.perfect ? "Perfect lesson!" : "Lesson complete!"}
       subtitle={practice ? <span className="font-bold text-red">+1 ❤️ heart refilled</span> : undefined}
       stats={
         <>

@@ -37,8 +37,10 @@ placeholders, so every career always has 16 easy, 16 medium and 8 hard questions
 | `getProfile` | Top bar, right rail, lesson hearts, profile | Applies heart regen + streak expiry, then returns the profile. Creates a guest if none |
 | `updateProfile(patch)` | Picking a career, opening a path, edit name, daily goal | Merges the patch |
 | `recordAnswer(a)` | Every lesson / boss / warm-up answer | Correct: adds `xp_earned`, updates streak. Wrong in `lesson` mode: −1 heart |
-| `completeLesson(p)` | End of a lesson; boss pass (`lesson_key: "boss"`) | +10 XP, +5 if perfect; stores/updates `best_accuracy`; `completed_lessons += 1` the first time |
+| `completeLesson(p)` | End of a lesson or unit review (`review-1/2`); boss pass (`lesson_key: "boss"`) | +10 XP, +5 if perfect; stores/updates `best_accuracy`; `completed_lessons += 1` the first time |
 | `listLessonProgress(slug)` | Path bubble states; out-of-hearts practice pick | Rows from `cq.mock.progress` |
+| `claimChest({career_slug, chest_key})` | Opening a chest node on the path (`chest-u1`, `chest-u2`) | +20 XP once; stored as a progress row with that key |
+| `unlockUnit({career_slug, unit, accuracy})` | Passing a test-out ("JUMP HERE?" or onboarding "Find my level", 5/6) | Adds progress rows for the unit's lessons + review (not the chest) |
 | `refillHeartByPractice` | Finishing a practice lesson (`?practice=1`) | +1 heart, max 5 |
 | `buyStreakFreeze` | Profile → Streak freezes | −200 XP, +1 freeze; throws if XP < 200 |
 | `issueCertificate({career_slug, score})` | Boss passed (score = % correct) | Creates `CQ-XXXX-XXXX` |
@@ -46,11 +48,12 @@ placeholders, so every career always has 16 easy, 16 medium and 8 hard questions
 | `listMyCertificates` | Certificate page, profile, boss "your best" | Filters by current user |
 | `getWeeklyLeaderboard` | /leaderboard, right rail league card | 15 seeded bots (re-seeded each Monday) + you; top 20, plus your row if you're outside it |
 | `getWeeklyXp` | Profile chart, streak screen week dots, daily goal | Last 7 days from the XP log, oldest first |
-| `getQuests` | (not shown yet; Prompt 3 `/quests`) | 3 daily quests computed from today's stats |
-| `submitQuestionFeedback` | Flag button on the lesson feedback sheet | Appends to `cq.mock.feedback` |
+| `getQuests` | `/quests`, Daily Quests card in the right rail | Earn the daily goal, 5 right in a row, a lesson at 90%+; computed from today's stats; `resets_at` = local midnight |
+| `listAchievements` | Profile badges grid; "Achievement unlocked" toast | 6 badges computed from progress; `unlocked_at` saved the first time each is earned |
+| `submitQuestionFeedback` | TOO EASY · TOO DIFFICULT · REPORT links on every feedback sheet | Appends to `cq.mock.feedback` |
 | `syncToNotion` | Profile → Sync to Notion | Waits 1.5 s; `{ok:true, page_url}` 4 times in 5, an error 1 time in 5 |
 | `battle` | Live Battle (Prompt 2) | `{}` placeholder |
-| `serverNow` | Arena clocks once Live Battle lands | `Date.now()` |
+| `serverNow` | Live Battle, if it's built (on hold) | `Date.now()` |
 | `resetDemoData?` | Mock-only link in /profile | Clears every `cq.mock.*` key |
 
 ## Rules the backend must enforce
@@ -67,25 +70,30 @@ The UI shows what the API returns (it may animate a heart loss early, but the se
   to 0, unless streak freezes cover the missed days (consume one per day).
 - **Weekly leaderboard.** Window = Monday 00:00 → next Monday, in the user's local time (the UI countdown
   assumes this). Return the top 20 plus the caller's own row.
+- **Path order.** `easy-1, easy-2, chest-u1, easy-3, easy-4, review-1, medium-1, medium-2, chest-u2, medium-3, medium-4, review-2, boss`
+  (`PATH` in `src/lib/game.ts`). `listLessonProgress` returns one row per finished key, chests included.
+- **Chests / test-outs.** A chest pays 20 XP once. `unlockUnit` must only follow a verified 5/6 test-out.
+- **Weekly league unlock.** The UI hides the league until `completed_lessons >= 3`.
 - **Boss / certificates.** Pass = 6 of 8 correct. Only issue a certificate for a verified pass. `getCertificate`
   must be readable without auth.
-- **Answers are secret.** For Live Battle (and ideally lessons), don't send `answer_letter` to the browser before
-  the answer is locked. See `lovable-kit/prompt-2C-anti-cheat.md`.
+- **Answers are secret.** Ideally don't send `answer_letter` to the browser before the answer is locked. See `lovable-kit/prompt-2C-anti-cheat.md`.
 
 ## Loading, empty and error states
 
 | Screen | Call | Loading | Empty | Error |
 |---|---|---|---|---|
 | `/` landing | `getSession`, `getProfile`, `listCareers` | falls back to static careers | — | — |
-| `/start` | `listCareers` | Byte thinking + skeletons | — | ErrorState + retry |
+| `/start` (onboarding) | `getProfile`, `updateProfile` (starting_level, daily_goal_xp, chosen_career), `listCareers` | Byte thinking + skeletons | — | ErrorState + retry |
+| `/test-out/:career/:unit` | `listQuestions`, `recordAnswer`, `unlockUnit` | "Building your test…"; button waits for the unlock | — | ErrorState + retry |
+| `/quests` | `getQuests` | Byte thinking + skeletons | locked "More quests unlock soon" row | ErrorState + retry |
 | `/match` | (route state from Vibe Check) | "Byte is thinking…" | no ranking → back to `/vibe-check` | — |
-| `/warmup/:career` | `listCareers`, `recordAnswer` | — | unknown career → `/start` | — |
+| `/vibe-check`, `/warmup/:career` | `listCareers`, `recordAnswer` | — | unknown career → `/start` | — |
 | `/learn/:career` | `listQuestions`, `listLessonProgress`, `getProfile` | Byte thinking + skeletons | — | ErrorState + retry |
 | `/lesson/:career/:key` | `listQuestions`, `getProfile`, `recordAnswer`, `completeLesson`, `refillHeartByPractice` | Byte thinking + skeletons | 0 hearts → Out of hearts screen | ErrorState + retry |
-| `/boss/:career` | `listQuestions`, `listMyCertificates`, `recordAnswer`, `issueCertificate`, `completeLesson` | "Summoning the boss…"; CONTINUE shows "Issuing certificate…" | — | ErrorState + retry; "Couldn't issue it" on the button |
+| `/boss/:career` | `listQuestions`, `listMyCertificates`, `recordAnswer`, `issueCertificate`, `completeLesson` | "Summoning the boss…"; the button shows "Issuing certificate…" | — | ErrorState + retry; "Couldn't issue it" on the button |
 | `/certificate/:career` | `listMyCertificates`, `listCareers` | Byte thinking | "No certificate yet" + back to path | ErrorState + retry |
 | `/certificate/verify/:id` | `getCertificate` | Byte thinking | "Not found" (Byte shocked) | ErrorState + retry |
-| `/leaderboard` | `getWeeklyLeaderboard`, `getProfile` | Byte thinking + skeletons | "No one's here yet" | ErrorState + retry |
-| `/profile` | `getProfile`, `getWeeklyXp`, `listMyCertificates`, `syncToNotion`, `buyStreakFreeze` | Byte thinking per section | no career / no certificates / no XP this week | ErrorState + retry; freeze error text; Notion error + Try again (Byte wrong) |
-| Right rail (≥1024px) | `getProfile`, `getWeeklyXp`, `getWeeklyLeaderboard` | skeletons | — | — |
+| `/leaderboard` | `getWeeklyLeaderboard`, `getProfile` | Byte thinking + skeletons | locked state (< 3 lessons); "No one's here yet" | ErrorState + retry |
+| `/profile` | `getProfile`, `getWeeklyXp`, `listMyCertificates`, `listAchievements`, `syncToNotion`, `buyStreakFreeze` | Byte thinking per section | no career / no certificates / no XP this week | ErrorState + retry; freeze error text; Notion error + Try again (Byte wrong) |
+| Right rail (≥1024px) | `getProfile`, `getWeeklyXp`, `getWeeklyLeaderboard`, `getQuests` | skeletons | Unlock Leaderboards card; sign-up nudge for guests | — |
 | Nickname / email sheets | `startGuest`, `sendMagicLink` | button shows "Starting…" / "Sending…" | — | "Couldn't send the link" |

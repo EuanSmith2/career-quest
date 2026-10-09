@@ -54,15 +54,18 @@ export function shuffleOptions(q: Question, rng: Rng = Math.random): ShuffledQue
 
 export const UNIT_LESSONS = 4;
 export const LESSON_SIZE = 4;
+/** Playable lesson keys: 4 easy, 4 medium, a review per unit, and the boss. */
 export const LESSON_KEYS = [
   "easy-1",
   "easy-2",
   "easy-3",
   "easy-4",
+  "review-1",
   "medium-1",
   "medium-2",
   "medium-3",
   "medium-4",
+  "review-2",
   "boss",
 ] as const;
 export type LessonKey = (typeof LESSON_KEYS)[number];
@@ -70,6 +73,38 @@ export type LessonKey = (typeof LESSON_KEYS)[number];
 export function isLessonKey(k: string): k is LessonKey {
   return (LESSON_KEYS as readonly string[]).includes(k);
 }
+
+export type NodeKind = "lesson" | "chest" | "review" | "boss";
+export interface PathNode {
+  key: string;
+  kind: NodeKind;
+  unit: 1 | 2 | 3;
+}
+
+/** The path in order: a chest after lesson 2 of each unit, a trophy review closing it, then the boss. */
+export const PATH: PathNode[] = [
+  { key: "easy-1", kind: "lesson", unit: 1 },
+  { key: "easy-2", kind: "lesson", unit: 1 },
+  { key: "chest-u1", kind: "chest", unit: 1 },
+  { key: "easy-3", kind: "lesson", unit: 1 },
+  { key: "easy-4", kind: "lesson", unit: 1 },
+  { key: "review-1", kind: "review", unit: 1 },
+  { key: "medium-1", kind: "lesson", unit: 2 },
+  { key: "medium-2", kind: "lesson", unit: 2 },
+  { key: "chest-u2", kind: "chest", unit: 2 },
+  { key: "medium-3", kind: "lesson", unit: 2 },
+  { key: "medium-4", kind: "lesson", unit: 2 },
+  { key: "review-2", kind: "review", unit: 2 },
+  { key: "boss", kind: "boss", unit: 3 },
+];
+
+/** Keys a passed test-out marks done for a unit (its lessons and review; the chest stays to be opened). */
+export function unitLessonKeys(unit: 1 | 2): string[] {
+  return PATH.filter((n) => n.unit === unit && n.kind !== "chest").map((n) => n.key);
+}
+
+export const CHEST_XP = 20;
+export const REVIEW_SIZE = 6;
 
 const byId = (a: Question, b: Question) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
@@ -81,7 +116,8 @@ export function sliceLessons(questions: Question[]): Record<LessonKey, Question[
   const sorted = [...questions].sort(byId);
   const easy = sorted.filter((q) => q.difficulty === "easy");
   const medium = sorted.filter((q) => q.difficulty === "medium");
-  const out = { boss: sorted.filter((q) => q.difficulty === "hard") } as Record<LessonKey, Question[]>;
+  // reviews hold the whole unit; the lesson samples REVIEW_SIZE of them each time
+  const out = { boss: sorted.filter((q) => q.difficulty === "hard"), "review-1": easy, "review-2": medium } as Record<LessonKey, Question[]>;
   for (let i = 0; i < UNIT_LESSONS; i++) {
     out[`easy-${i + 1}` as LessonKey] = easy.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
     out[`medium-${i + 1}` as LessonKey] = medium.slice(i * LESSON_SIZE, (i + 1) * LESSON_SIZE);
@@ -89,15 +125,16 @@ export function sliceLessons(questions: Question[]): Record<LessonKey, Question[
   return out;
 }
 
-/** The first lesson not yet done, in path order; null if everything is done. */
-export function currentLesson(doneKeys: Iterable<string>): LessonKey | null {
+/** The first path node not yet done (lesson, chest, review or boss); null if everything is done. */
+export function currentLesson(doneKeys: Iterable<string>): string | null {
   const done = new Set(doneKeys);
-  return LESSON_KEYS.find((k) => !done.has(k)) ?? null;
+  return PATH.find((n) => !done.has(n.key))?.key ?? null;
 }
 
 /** "Lesson 2 of 4" for easy-2; unit 1 = easy, unit 2 = medium, unit 3 = boss. */
 export function lessonPosition(key: LessonKey): { unit: 1 | 2 | 3; index: number; of: number } {
   if (key === "boss") return { unit: 3, index: 1, of: 1 };
+  if (key.startsWith("review")) return { unit: key === "review-1" ? 1 : 2, index: UNIT_LESSONS + 1, of: UNIT_LESSONS };
   const [kind, n] = key.split("-");
   return { unit: kind === "easy" ? 1 : 2, index: Number(n), of: UNIT_LESSONS };
 }
@@ -316,3 +353,6 @@ export const TEST_OUT_PASS = 5;
 export function pickTestOut(questions: Question[], n = TEST_OUT_SIZE, rng: Rng = Math.random): Question[] {
   return shuffle(questions, rng).slice(0, n);
 }
+
+/** Lessons needed before the weekly league opens. */
+export const LEAGUE_UNLOCK_LESSONS = 3;

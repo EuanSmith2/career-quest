@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Award, BookCheck, Flame, Moon, Snowflake, Volume2, Zap } from "lucide-react";
 import {
+  useAchievements,
   useBuyStreakFreeze,
   useCareer,
   useMyCertificates,
@@ -32,6 +33,7 @@ export default function Profile() {
   const { data: session } = useSession();
   const { data: career } = useCareer(profile.data?.chosen_career);
   const certs = useMyCertificates();
+  const achievements = useAchievements();
   const week = useWeeklyXp();
   const update = useUpdateProfile();
   const freeze = useBuyStreakFreeze();
@@ -111,6 +113,35 @@ export default function Profile() {
       <section>
         <h2 className="mb-3 text-section">XP this week</h2>
         {week.isLoading ? <LoadingState rows={1} label="Loading XP…" /> : week.data ? <XpChart days={week.data} /> : <ErrorState onRetry={() => week.refetch()} />}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-section">Achievements</h2>
+        {achievements.isLoading ? (
+          <LoadingState rows={2} label="Loading badges…" />
+        ) : achievements.data ? (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {achievements.data.map((a) => {
+              const got = !!a.unlocked_at;
+              return (
+                <li key={a.id} className={cn("flex flex-col items-center gap-1 rounded-card border-2 p-4 text-center", got ? "border-gold" : "border-border")}>
+                  <span className={cn("text-[36px] leading-none", !got && "opacity-30 grayscale")} aria-hidden>
+                    {a.icon}
+                  </span>
+                  <span className="font-extrabold leading-tight">{a.title}</span>
+                  <span className="text-[13px] text-muted-foreground">{a.description}</span>
+                  {!got && (
+                    <span className="mt-1 text-[12px] font-extrabold tabular-nums text-muted-foreground">
+                      {a.progress}/{a.target}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <ErrorState onRetry={() => achievements.refetch()} />
+        )}
       </section>
 
       <section>
@@ -271,7 +302,7 @@ function XpChart({ days }: { days: DayXp[] }) {
             <div key={d.date} className="group relative flex h-full flex-1 flex-col items-center justify-end" tabIndex={0}>
               {isToday && d.xp > 0 && <span className="mb-1 text-caption font-extrabold text-foreground">{d.xp}</span>}
               <div
-                className={cn("w-full max-w-[36px] rounded-t-[4px] transition-[height] duration-500", isToday ? "bg-blue" : "bg-blue-border")}
+                className={cn("w-full max-w-[36px] rounded-t-[4px] transition-[height] duration-500", isToday ? "bg-gold" : "bg-gold-lip")}
                 style={{ height: `${Math.max(h, d.xp > 0 ? 3 : 0)}%` }}
               />
               <span className="pointer-events-none absolute -top-8 left-1/2 z-10 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 text-[12px] font-bold text-white group-hover:block group-focus:block">

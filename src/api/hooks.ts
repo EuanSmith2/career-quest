@@ -15,6 +15,7 @@ export const keys = {
   leaderboard: ["leaderboard"] as const,
   weeklyXp: ["weeklyXp"] as const,
   quests: ["quests"] as const,
+  achievements: ["achievements"] as const,
 };
 
 // ---------- session ----------
@@ -76,8 +77,9 @@ export function useQuestions(career_slug: string | undefined, difficulty?: Diffi
 
 // ---------- profile + progress ----------
 
-export function useProfile() {
-  return useQuery({ queryKey: keys.profile, queryFn: () => api.getProfile() });
+/** Pass enabled=false where there may be no session yet (e.g. the landing page), so reading doesn't create a guest. */
+export function useProfile(enabled = true) {
+  return useQuery({ queryKey: keys.profile, queryFn: () => api.getProfile(), enabled });
 }
 
 function useProfileWriter() {
@@ -87,6 +89,7 @@ function useProfileWriter() {
     void qc.invalidateQueries({ queryKey: keys.leaderboard });
     void qc.invalidateQueries({ queryKey: keys.weeklyXp });
     void qc.invalidateQueries({ queryKey: keys.quests });
+    void qc.invalidateQueries({ queryKey: keys.achievements });
   };
 }
 
@@ -120,6 +123,29 @@ export function useLessonProgress(career_slug: string | undefined) {
     queryKey: keys.progress(career_slug ?? ""),
     queryFn: () => api.listLessonProgress(career_slug!),
     enabled: !!career_slug,
+  });
+}
+
+export function useClaimChest() {
+  const qc = useQueryClient();
+  const setProfile = useProfileWriter();
+  return useMutation({
+    mutationFn: (p: { career_slug: string; chest_key: string }) => api.claimChest(p),
+    onSuccess: (r, vars) => {
+      setProfile(r.profile);
+      void qc.invalidateQueries({ queryKey: keys.progress(vars.career_slug) });
+    },
+  });
+}
+
+export function useUnlockUnit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (p: { career_slug: string; unit: 1 | 2; accuracy: number }) => api.unlockUnit(p),
+    onSuccess: (rows, vars) => {
+      qc.setQueryData(keys.progress(vars.career_slug), rows);
+      void qc.invalidateQueries({ queryKey: keys.achievements });
+    },
   });
 }
 
@@ -166,6 +192,10 @@ export function useWeeklyXp() {
 
 export function useQuests() {
   return useQuery({ queryKey: keys.quests, queryFn: () => api.getQuests() });
+}
+
+export function useAchievements(enabled = true) {
+  return useQuery({ queryKey: keys.achievements, queryFn: () => api.listAchievements(), enabled });
 }
 
 // ---------- crowd-verification + sponsor ----------
