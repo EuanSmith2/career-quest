@@ -280,8 +280,8 @@ export default function Landing() {
 
       <header className="relative z-10 mx-auto flex max-w-landing items-center justify-between px-4 py-4">
         <Logo />
-        <Link to="/styleguide" className="text-caption font-bold text-muted-foreground hover:text-link">
-          Styleguide
+        <Link to="/about" className="text-caption font-bold text-muted-foreground hover:text-link">
+          About
         </Link>
       </header>
 

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Byte, type ByteMood } from "@/components/Byte";
@@ -29,6 +29,11 @@ const reveal = (delay: number) => ({
 });
 
 export default function About() {
+  // The slide shows first. "Start the demo" plays the intro film; when it ends, or is skipped, the demo starts.
+  const [film, setFilm] = useState(false);
+  const navigate = useNavigate();
+  const startDemo = () => navigate("/start");
+  if (film) return <IntroFilm onDone={startDemo} onSkip={startDemo} />;
   return (
     <div className="min-h-dvh bg-black text-white" style={{ "--byte-shadow": "#1c1c1e" } as React.CSSProperties}>
       <header className="mx-auto flex h-16 max-w-[1080px] items-center justify-between px-4 md:px-6">
@@ -93,14 +98,55 @@ export default function About() {
         </div>
 
         <motion.div {...reveal(0.7)} className="md:self-center">
-          <ChunkyButton asChild variant="secondary" block className="text-black md:w-auto md:px-8">
-            <Link to="/start">
-              Start the demo
-              <ArrowRight className="h-5 w-5" strokeWidth={3} />
-            </Link>
+          <ChunkyButton variant="secondary" block className="text-black md:w-auto md:px-8" onClick={() => setFilm(true)}>
+            Start the demo
+            <ArrowRight className="h-5 w-5" strokeWidth={3} />
           </ChunkyButton>
         </motion.div>
       </main>
+    </div>
+  );
+}
+
+/**
+ * The intro film (public/about-video/index.html, from the team's "Career Quest Midnight" artifact),
+ * full-screen with a Skip button. The film posts "cq:intro-done" when it ends and "cq:intro-skip"
+ * if Esc is pressed inside it; Esc on the page itself skips too.
+ */
+function IntroFilm({ onDone, onSkip }: { onDone: () => void; onSkip: () => void }) {
+  const frame = useRef<HTMLIFrameElement>(null);
+  const handlers = useRef({ onDone, onSkip });
+  handlers.current = { onDone, onSkip };
+
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || e.source !== frame.current?.contentWindow) return;
+      if (e.data?.type === "cq:intro-done") handlers.current.onDone();
+      if (e.data?.type === "cq:intro-skip") handlers.current.onSkip();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handlers.current.onSkip();
+    };
+    window.addEventListener("message", onMessage);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("message", onMessage);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black">
+      <iframe ref={frame} src="/about-video/index.html" title="Career Quest intro film" className="h-full w-full border-0" />
+      <button
+        type="button"
+        onClick={onSkip}
+        autoFocus
+        className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full border-2 border-[#2c2c2e] bg-black px-4 py-2 text-[13px] font-extrabold uppercase tracking-[.05em] text-[#8fd8fb] hover:border-[#1cb0f6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1cb0f6] md:right-6 md:top-6"
+      >
+        Skip to the demo
+        <ArrowRight className="h-4 w-4" strokeWidth={3} />
+      </button>
     </div>
   );
 }
