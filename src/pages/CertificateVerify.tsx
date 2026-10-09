@@ -35,7 +35,7 @@ export default function CertificateVerify() {
           </div>
         ) : (
           <>
-            <p className="flex items-center justify-center gap-2 rounded-full bg-green-soft px-4 py-2 font-extrabold text-green-lip">
+            <p className="flex items-center justify-center gap-2 rounded-full bg-correct-soft px-4 py-2 font-extrabold text-correct-text">
               <BadgeCheck className="h-5 w-5" /> Verified Career Quest certificate
             </p>
             <CertificateCard cert={cert.data} career={career.data} />

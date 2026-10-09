@@ -107,7 +107,7 @@ function EmailSheet({ mode, onClose }: { mode: "save" | "signin" | null; onClose
       <SheetContent>
         {send.isSuccess ? (
           <div className="flex flex-col items-center gap-4 text-center">
-            <MailCheck className="h-16 w-16 text-green" />
+            <MailCheck className="h-16 w-16 text-correct" />
             <SheetTitle>Check your inbox</SheetTitle>
             <SheetDescription>
               We sent a sign-in link to <strong className="text-foreground">{email}</strong>. Open it on this device to keep your progress.
@@ -132,7 +132,7 @@ function EmailSheet({ mode, onClose }: { mode: "save" | "signin" | null; onClose
                 : "Add your email to keep your XP, streak and certificates on any device. No password needed."}
             </SheetDescription>
             <Input type="email" autoFocus value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" aria-label="Email" />
-            {send.isError && <p className="text-caption font-bold text-red-lip">Couldn't send the link. Try again.</p>}
+            {send.isError && <p className="text-caption font-bold text-wrong-text">Couldn't send the link. Try again.</p>}
             <ChunkyButton type="submit" block variant="secondary" disabled={!valid || send.isPending}>
               {send.isPending ? "Sending…" : "Send magic link"}
             </ChunkyButton>

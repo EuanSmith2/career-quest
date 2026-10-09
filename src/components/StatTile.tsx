@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const TONES = {
-  gold: { border: "border-gold", head: "bg-gold text-foreground", value: "text-gold-lip" },
-  green: { border: "border-green", head: "bg-green text-white", value: "text-green-lip" },
-  blue: { border: "border-blue", head: "bg-blue text-white", value: "text-blue-text" },
-  flame: { border: "border-flame", head: "bg-flame text-white", value: "text-flame" },
+  gold: { border: "border-gold", head: "bg-gold text-ink-bright", value: "text-gold" },
+  green: { border: "border-correct", head: "bg-correct text-white dark:text-primary-fg", value: "text-correct-text" },
+  blue: { border: "border-blue", head: "bg-blue text-white dark:text-primary-fg", value: "text-selected-fg" },
+  flame: { border: "border-flame", head: "bg-flame text-white dark:text-primary-fg", value: "text-flame" },
 } as const;
 
 /** Lesson-complete stat: coloured header label over a white value box. */

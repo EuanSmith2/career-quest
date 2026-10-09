@@ -131,7 +131,7 @@ function RightRail() {
               {p?.streak ? "Earn XP today to keep it going." : "Finish a lesson to start a streak."}
             </p>
           </RailCard>
-          <RailCard title="Daily goal" icon={<Target className="h-6 w-6 text-green" />}>
+          <RailCard title="Daily goal" icon={<Target className="h-6 w-6 text-correct" />}>
             <div className="flex items-center gap-3">
               <ProgressBar value={today / goal} label="Daily goal" />
               <span className="shrink-0 text-caption font-extrabold text-muted-foreground">

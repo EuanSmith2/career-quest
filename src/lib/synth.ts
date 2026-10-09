@@ -129,12 +129,7 @@ export const SYNTH: Record<SoundName, Recipe> = {
     noise(ac, out, { dur: 0.08, gain: 0.18, type: "lowpass", freq: 500 });
   },
 
-  tick: (ac, out) => tone(ac, out, { freq: 1250, dur: 0.05, gain: 0.2, partials: [[2.7, 0.3]] }),
 
-  "time-up": (ac, out) => {
-    tone(ac, out, { freq: NOTE.A3, dur: 0.16, gain: 0.3, type: "square", lowpass: 900 });
-    tone(ac, out, { freq: NOTE.A3, at: 0.22, dur: 0.3, gain: 0.3, type: "square", lowpass: 900 });
-  },
 
   "lesson-complete": (ac, out) => {
     [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6].forEach((f, i) =>
@@ -176,16 +171,5 @@ export const SYNTH: Record<SoundName, Recipe> = {
 
   "pair-match": (ac, out) => tone(ac, out, { freq: 500, glideTo: 1100, dur: 0.09, gain: 0.2, type: "sine" }),
 
-  podium: (ac, out) => {
-    let t = 0;
-    for (let i = 0; i < 16; i++) {
-      noise(ac, out, { at: t, dur: 0.06, gain: 0.06 + (i / 16) * 0.14, type: "bandpass", freq: 1800 });
-      t += 0.06;
-    }
-    tone(ac, out, { freq: 80, at: t, dur: 0.4, gain: 0.45 });
-    noise(ac, out, { at: t, dur: 0.9, gain: 0.2, type: "highpass", freq: 5000 });
-    [NOTE.C5, NOTE.E5, NOTE.G5].forEach((f) => tone(ac, out, { freq: f, at: t, dur: 0.9, gain: 0.12, type: "sawtooth", lowpass: 2600 }));
-  },
 
-  join: (ac, out) => tone(ac, out, { freq: 380, glideTo: 820, dur: 0.12, gain: 0.22, type: "sine" }),
 };

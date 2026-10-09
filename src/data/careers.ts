@@ -116,7 +116,7 @@ export const CAREERS: Career[] = [
     name: "IT Security",
     job_title: "IT Security Specialist",
     icon: "Lock",
-    color: "#ffc800",
+    color: "#e6b400", // a deeper gold than the brand gold so it reads on black
     one_liner: "Keep a company's everyday IT safe",
     day_to_day: "Manage accounts and access, patching, MFA, backups and security awareness",
     tools: "Active Directory, MDM, patching tools",
@@ -149,18 +149,18 @@ export const CAREERS: Career[] = [
   },
 ];
 
-/** Short names for the landing-page career strip. */
+/** Short labels for the career strip, pills and tiles (UI-only; not part of the API type). */
 export const SHORT_NAMES: Record<string, string> = {
-  security_analyst: "SOC",
-  penetration_testing: "Pen Testing",
-  incident_response: "Incident Resp.",
-  malware_analyst: "Malware",
-  cloud_security: "Cloud",
+  security_analyst: "SOC Analyst",
+  penetration_testing: "Pen Tester",
+  incident_response: "Incident Responder",
+  malware_analyst: "Malware Analyst",
+  cloud_security: "Cloud Security",
   devsecops: "DevSecOps",
-  network_security: "Network",
-  security_engineer: "Sec Engineer",
+  network_security: "Network Security",
+  security_engineer: "Security Engineer",
   security_consultant: "Consultant",
   it_security: "IT Security",
-  embedded_systems_security: "IoT",
+  embedded_systems_security: "IoT Security",
   ai_with_cybersecurity: "AI Security",
 };

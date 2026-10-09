@@ -2,16 +2,17 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 
-export type ChunkyVariant = "primary" | "secondary" | "danger" | "outline" | "ghost" | "gold" | "arena";
+export type ChunkyVariant = "primary" | "secondary" | "danger" | "correct" | "outline" | "ghost" | "gold";
 
+// primary = green in Light, blue (with black text) in Midnight. "correct" stays green in both.
 const VARIANTS: Record<ChunkyVariant, { className: string; lip: string | null }> = {
-  primary: { className: "bg-green text-white", lip: "var(--green-lip)" },
-  secondary: { className: "bg-blue text-white", lip: "var(--blue-lip)" },
-  danger: { className: "bg-red text-white", lip: "var(--red-lip)" },
-  outline: { className: "border-2 border-border bg-background text-blue", lip: "var(--border)" },
-  ghost: { className: "bg-transparent text-blue hover:bg-blue-soft", lip: null },
-  gold: { className: "bg-gold text-foreground", lip: "var(--gold-lip)" },
-  arena: { className: "bg-arena-card text-arena", lip: "var(--border)" },
+  primary: { className: "bg-primary text-primary-fg", lip: "var(--primary-lip)" },
+  secondary: { className: "bg-blue text-white dark:text-primary-fg", lip: "var(--blue-lip)" },
+  danger: { className: "bg-wrong text-white dark:text-primary-fg", lip: "var(--red-lip)" },
+  correct: { className: "bg-correct text-white dark:text-primary-fg", lip: "var(--green-lip)" },
+  outline: { className: "border-2 border-border bg-background text-link", lip: "var(--border-deep)" },
+  ghost: { className: "bg-transparent text-link hover:bg-muted", lip: null },
+  gold: { className: "bg-gold text-ink-bright", lip: "var(--gold-lip)" },
 };
 
 export interface ChunkyButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -20,7 +21,7 @@ export interface ChunkyButtonProps extends React.ButtonHTMLAttributes<HTMLButton
   asChild?: boolean;
 }
 
-/** The signature 3D button. Every primary action uses it. */
+/** The signature 3D button (pop-button press). Every primary action uses it. */
 export const ChunkyButton = React.forwardRef<HTMLButtonElement, ChunkyButtonProps>(function ChunkyButton(
   { variant = "primary", block, asChild, className, style, disabled, type = "button", ...props },
   ref,

@@ -18,7 +18,7 @@ export const CertificateCard = forwardRef<HTMLDivElement, { cert: Certificate; c
           <p className="text-caption font-extrabold uppercase tracking-[3px] text-muted-foreground">Certificate of completion</p>
           <CareerBadge icon={career.icon} color={career.color} size={64} />
           <h2 className="text-[24px] font-black leading-tight sm:text-[28px]">
-            Career Quest · {career.job_title} · <span className="text-green-lip">Level 1 complete</span>
+            Career Quest · {career.job_title} · <span className="text-correct-text">Level 1 complete</span>
           </h2>
           <p className="text-caption text-muted-foreground">awarded to</p>
           <p className="break-all text-[30px] font-black leading-tight text-blue-text">{cert.display_name}</p>

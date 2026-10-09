@@ -17,21 +17,21 @@ Decisions from the team are recorded at the bottom.
 
 ### Phase 1 · Kill the Kahoot
 Everything that looked like a live quiz show becomes a Duolingo-style screen.
-- [ ] Vibe Check: Duolingo question screen, Byte asks each question, option cards with icons, no timer, no coloured shape tiles
-- [ ] Meet the Jobs: a normal lesson-style round (option cards, CHECK, feedback sheet), no timer or speed points
-- [ ] Boss Level → **Final Test**: the 8 hard questions as a lesson screen, no hearts lost, 6/8 passes, score = % correct
-- [ ] End screens use the lesson-complete layout (stat tiles), not a podium
-- [ ] Delete ArenaRound, AnswerTile, TileShape, Podium, arena + tile tokens, speed-points logic
-- [ ] Sounds: drop `podium`/`tick`/`time-up`/`join`
+- [x] Vibe Check: Byte asks each question in his speech bubble, option cards, no timer, no coloured shape tiles; match reveal is typing dots → scratch card
+- [x] Meet the Jobs: a normal lesson-style round (option cards, CHECK, feedback sheet), no timer or speed points
+- [x] Boss Level: the 8 hard questions as a lesson screen, no hearts lost, 6/8 passes, score = % correct
+- [x] End screens use the lesson-complete layout (stat tiles), not a podium
+- [x] Delete ArenaRound, AnswerTile, TileShape, Podium, arena + tile tokens, speed-points logic
+- [x] Sounds: drop `podium`/`tick`/`time-up`/`join`
 
 ### Phase 2 · Midnight theme (default)
-- [ ] `[data-theme="midnight"]` tokens from 1B §A; Light theme kept behind a toggle in /profile (`cq.theme`)
-- [ ] Tailwind `darkMode: ['selector', '[data-theme="midnight"]']`; primary actions blue with black text
-- [ ] Midnight cards/options: 14px radius, icon chip, picked = lift + blue glow; dimmed 0.35
+- [x] `[data-theme="midnight"]` tokens from 1B §A; Light theme kept behind a toggle in /profile (`cq.theme`)
+- [x] Tailwind `darkMode: ['selector', '[data-theme="midnight"]']`; primary actions blue with black text
+- [x] Midnight cards/options: 14px radius, icon chip, picked = lift + blue glow; dimmed 0.35
 - [ ] Path nodes 72×66 with 8px lip; done = primary blue; locked = dark grey
-- [ ] Fonts: Instrument Serif italic (one accent word per headline), JetBrains Mono (fine print), wordmark
+- [x] Fonts: Instrument Serif italic (one accent word per headline), JetBrains Mono (fine print), wordmark
 - [ ] Blur-in reveals, 0.6s crossfades, reduced-motion = fade only
-- [ ] `it_security` colour → `#e6b400`; SHORT_NAMES updated
+- [x] `it_security` colour → `#e6b400`; SHORT_NAMES updated
 
 ### Phase 3 · Onboarding as a conversation
 - [ ] Byte top-left with a typing speech bubble; CONTINUE unlocks when typing ends
@@ -40,12 +40,12 @@ Everything that looked like a live quiz show becomes a Duolingo-style screen.
 - [ ] Saves `starting_level` and `daily_goal_xp` via `updateProfile`
 
 ### Phase 4 · Lesson details
-- [ ] Coloured tag with icon (NEW CONCEPT / HARD), 32px question, number-key badges bottom-right
-- [ ] SKIP + CHECK bottom bar; progress bar knob that glows and pulses
-- [ ] Correct: particle burst on the card, random praise with sparkles; Wrong: heart shakes, "Correct solution:"
-- [ ] TOO EASY · TOO DIFFICULT · REPORT links (report form + "Thanks, we'll check it" toast)
-- [ ] Match pairs exercise once per lesson (5 jobs ↔ 5 one-liners, 400 ms lockout, wrong pair costs a heart)
-- [ ] Quit modal copy from 1B
+- [x] Coloured tag with icon (NEW CONCEPT / HARD), 32px question, number-key badges bottom-right
+- [x] SKIP + CHECK bottom bar; progress bar knob that glows and pulses
+- [x] Correct: particle burst on the card, random praise with sparkles; Wrong: heart shakes, "Correct solution:"
+- [x] TOO EASY · TOO DIFFICULT · REPORT links (report form + "Thanks, we'll check it" toast)
+- [x] Match pairs exercise once per lesson (5 jobs ↔ 5 one-liners, 400 ms lockout, wrong pair costs a heart)
+- [x] Quit modal copy from 1B
 
 ### Phase 5 · Path details
 - [ ] Sticky unit header that recolours per unit; divider labels between units
@@ -55,7 +55,7 @@ Everything that looked like a live quiz show becomes a Duolingo-style screen.
 - [ ] API: `claimChest`, `unlockUnit`
 
 ### Phase 6 · Rail, quests, leaderboard
-- [ ] Number tickers; stat popovers (streak calendar, XP history, heart timer)
+- [x] Number tickers; stat popovers (streak calendar, XP history, heart timer)
 - [ ] Unlock Leaderboards card (until 3 lessons), sign-up nudge for guests
 - [ ] Daily Quests card + `/quests` page (Byte with chest, monthly challenge badge)
 - [ ] Leaderboard locked state (3 league shields over grey rows)

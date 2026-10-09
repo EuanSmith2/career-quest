@@ -1,101 +1,93 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Clock, Target, Trophy } from "lucide-react";
 import { useCareer, useCareers, useRecordAnswer } from "@/api/hooks";
-import { ArenaFrame, ArenaRound, type ArenaResult } from "@/components/arena/ArenaRound";
-import { Podium } from "@/components/arena/Podium";
-import { Byte } from "@/components/Byte";
 import { CareerBadge } from "@/components/CareerIcon";
 import { ChunkyButton } from "@/components/ChunkyButton";
+import { RoundEnd } from "@/components/round/RoundEnd";
+import { RoundPlayer, type RoundResult } from "@/components/round/RoundPlayer";
+import { StatTile } from "@/components/StatTile";
+import { CAREERS } from "@/data/careers";
 import { MEET_THE_JOBS } from "@/data/meetTheJobs";
 import { celebrate } from "@/lib/confetti";
-import { meetTheJobsToArena, pickMeetTheJobs } from "@/lib/game";
-import { useAnswerKeys } from "@/lib/useKeys";
-import { CAREERS } from "@/data/careers";
+import { formatDuration, lessonAccuracy, meetTheJobsToItem, pickMeetTheJobs } from "@/lib/game";
+import { playSound } from "@/lib/sound";
 
-const TIME = 15;
-
-/** Meet the Jobs: 6 Kahoot-style questions about what each job does, always including yours. */
+/** Meet the Jobs: 6 quick questions about what each job does, always including yours. */
 export default function Warmup() {
   const { career: slug = "" } = useParams();
   const navigate = useNavigate();
   const { data: careers } = useCareers();
   const record = useRecordAnswer();
-  const items = useMemo(() => pickMeetTheJobs(MEET_THE_JOBS, slug, 6).map((q) => meetTheJobsToArena(q)), [slug]);
-  const [results, setResults] = useState<ArenaResult[] | null>(null);
+  const items = useMemo(() => pickMeetTheJobs(MEET_THE_JOBS, slug, 6).map((q) => meetTheJobsToItem(q)), [slug]);
+  const started = useRef(Date.now());
+  const [done, setDone] = useState<{ results: RoundResult[]; ms: number } | null>(null);
 
   if (!CAREERS.some((c) => c.slug === slug)) return <Navigate to="/start" replace />;
-  if (results) return <WarmupEnd slug={slug} results={results} />;
+  if (done) return <WarmupEnd slug={slug} results={done.results} ms={done.ms} />;
 
   return (
-    <ArenaRound
+    <RoundPlayer
       items={items}
-      timeLimit={TIME}
-      scored
-      intro={{ mood: "talking", title: "Meet the Jobs", subtitle: "Six quick questions about what cyber people actually do all day. Faster answers score more." }}
-      onExit={() => navigate("/start")}
+      context="Meet the jobs"
+      onQuit={() => navigate(`/learn/${slug}`)}
       onAnswer={(r) => record.mutate({ question_id: `warmup:${r.item.id}`, correct: r.correct, xp_earned: 0, mode: "warmup" })}
-      revealExtra={(r) => {
+      feedbackExtra={(r) => {
         const c = careers?.find((x) => x.slug === r.item.careerSlug);
         return c ? (
-          <p className="flex items-center gap-2 font-bold">
-            <CareerBadge icon={c.icon} color={c.color} size={32} />
+          <p className="flex items-center gap-3 text-left font-bold">
+            <CareerBadge icon={c.icon} color={c.color} size={36} />
             <span>
               {c.job_title}: {c.one_liner}
             </span>
           </p>
         ) : null;
       }}
-      onFinish={setResults}
+      onFinish={(results) => setDone({ results, ms: Date.now() - started.current })}
     />
   );
 }
 
-function WarmupEnd({ slug, results }: { slug: string; results: ArenaResult[] }) {
+function WarmupEnd({ slug, results, ms }: { slug: string; results: RoundResult[]; ms: number }) {
   const navigate = useNavigate();
   const { data: career } = useCareer(slug);
-  const score = results.reduce((s, r) => s + r.points, 0);
   const correct = results.filter((r) => r.correct).length;
   const high = correct >= Math.ceil(results.length * 0.66);
-  let best = 0;
-  let run = 0;
-  for (const r of results) {
-    run = r.correct ? run + 1 : 0;
-    best = Math.max(best, run);
-  }
   const start = () => navigate(`/learn/${slug}`);
-  useAnswerKeys({ onEnter: start });
 
   useEffect(() => {
-    if (high) setTimeout(() => celebrate(true), 1300);
+    playSound("lesson-complete");
+    if (high) celebrate();
   }, [high]);
 
   return (
-    <ArenaFrame onExit={() => navigate(`/learn/${slug}`)}>
-      <div className="flex flex-1 flex-col items-center gap-6 pt-2 text-center">
-        <Byte mood={high ? "level-up" : "smug"} size={120} />
-        <h1 className="font-arena text-[28px] font-black sm:text-[36px]">{high ? "You know your jobs!" : "Round over"}</h1>
-        <Podium
-          className="w-full max-w-[520px]"
-          columns={[
-            { place: 1, label: "Score", value: score.toLocaleString() },
-            { place: 2, label: "Correct", value: `${correct}/${results.length}` },
-            { place: 3, label: "Best streak", value: `🔥${best}` },
-          ]}
-        />
-        {career && (
-          <div className="flex w-full max-w-[520px] items-center gap-4 rounded-card bg-arena-glass p-4 text-left">
-            <CareerBadge icon={career.icon} color={career.color} size={56} />
-            <div className="min-w-0">
-              <p className="text-caption font-extrabold uppercase tracking-wide text-arena-muted">Your path</p>
-              <p className="text-[22px] font-extrabold leading-tight">{career.job_title}</p>
-              <p className="text-caption text-arena-muted">{career.day_to_day}</p>
-            </div>
-          </div>
-        )}
-        <ChunkyButton className="mt-auto w-full max-w-[520px] text-[17px]" onClick={start}>
+    <RoundEnd
+      mood={high ? "level-up" : "smug"}
+      title={high ? "You know your jobs!" : "Round complete"}
+      stats={
+        <>
+          <StatTile tone="gold" label="Correct" value={`${correct}/${results.length}`} icon={<Trophy className="h-5 w-5" />} />
+          <StatTile tone="green" label="Accuracy" value={`${lessonAccuracy(correct, results.length)}%`} icon={<Target className="h-5 w-5" />} />
+          <StatTile tone="blue" label="Time" value={formatDuration(ms)} icon={<Clock className="h-5 w-5" />} />
+        </>
+      }
+      onEnter={start}
+      actions={
+        <ChunkyButton block onClick={start} autoFocus>
           Start learning
         </ChunkyButton>
-      </div>
-    </ArenaFrame>
+      }
+    >
+      {career && (
+        <div className="flex w-full items-center gap-4 rounded-card border-2 border-border p-4 text-left">
+          <CareerBadge icon={career.icon} color={career.color} size={56} />
+          <div className="min-w-0">
+            <p className="text-caption font-extrabold uppercase tracking-wide text-muted-foreground">Your path</p>
+            <p className="text-[22px] font-extrabold leading-tight">{career.job_title}</p>
+            <p className="text-caption text-muted-foreground">{career.day_to_day}</p>
+          </div>
+        </div>
+      )}
+    </RoundEnd>
   );
 }

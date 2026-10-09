@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const UNITS = [
   { n: 1, title: "Foundations", body: "The basics every {job} needs.", keys: ["easy-1", "easy-2", "easy-3", "easy-4"] as LessonKey[], bg: "bg-green", lip: "var(--green-lip)" },
   { n: 2, title: "On the Job", body: "Real situations from a {job}'s week.", keys: ["medium-1", "medium-2", "medium-3", "medium-4"] as LessonKey[], bg: "bg-blue", lip: "var(--blue-lip)" },
-  { n: 3, title: "Boss Level", body: "8 hard questions against the clock. Get 6 to earn your certificate.", keys: ["boss"] as LessonKey[], bg: "bg-arena", lip: "var(--arena-deep)" },
+  { n: 3, title: "Boss Level", body: "8 hard questions against the clock. Get 6 to earn your certificate.", keys: ["boss"] as LessonKey[], bg: "bg-boss", lip: "var(--boss-lip)" },
 ];
 
 type NodeState = "done" | "current" | "locked";
@@ -84,7 +84,7 @@ export default function Learn() {
                 </p>
                 <p className="text-body font-bold">{u.body.replace("{job}", c.job_title)}</p>
               </div>
-              <ChunkyButton variant="outline" className="shrink-0 border-white bg-transparent px-3 text-white" style={{ "--lip-color": "var(--arena-line)" } as React.CSSProperties} onClick={() => setGuide(u.n)}>
+              <ChunkyButton variant="outline" className="shrink-0 border-white bg-transparent px-3 text-white" style={{ "--lip-color": "var(--border)" } as React.CSSProperties} onClick={() => setGuide(u.n)}>
                 <BookOpen className="h-5 w-5" />
                 <span className="hidden min-[400px]:inline">Guidebook</span>
               </ChunkyButton>
@@ -188,9 +188,9 @@ function PathNode({
       ? { bg: "var(--gold)", lip: "var(--gold-lip)", fg: "var(--white)" }
       : state === "current"
         ? isBoss
-          ? { bg: "var(--arena)", lip: "var(--arena-deep)", fg: "var(--gold)" }
+          ? { bg: "var(--boss)", lip: "var(--boss-lip)", fg: "var(--gold)" }
           : { bg: career.color, lip: `color-mix(in srgb, ${career.color} 75%, black)`, fg: "var(--white)" }
-        : { bg: isBoss ? "var(--arena)" : "var(--disabled-bg)", lip: isBoss ? "var(--arena-deep)" : "var(--disabled-fg)", fg: isBoss ? "var(--arena-muted)" : "var(--disabled-fg)" };
+        : { bg: isBoss ? "var(--boss)" : "var(--disabled-bg)", lip: isBoss ? "var(--boss-lip)" : "var(--disabled-fg)", fg: isBoss ? "var(--node-locked-icon)" : "var(--disabled-fg)" };
 
   const Icon = state === "done" ? (isBoss ? Trophy : Check) : state === "locked" ? (isBoss ? Trophy : Lock) : isBoss ? Trophy : Star;
 
@@ -210,7 +210,7 @@ function PathNode({
                 <span className="absolute inset-0 rounded-full animate-pulse-ring" style={{ height: size, border: `6px solid ${isBoss ? "var(--gold)" : career.color}` }} aria-hidden />
                 <span
                   className="absolute -top-12 left-1/2 z-10 -translate-x-1/2 animate-float whitespace-nowrap rounded-btn border-2 border-border bg-background px-3 py-1.5 btn-text"
-                  style={{ color: isBoss ? "var(--arena)" : career.color }}
+                  style={{ color: isBoss ? "var(--boss)" : career.color }}
                   aria-hidden
                 >
                   Start

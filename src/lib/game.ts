@@ -7,14 +7,7 @@ import type { MeetTheJobsQuestion } from "@/data/meetTheJobs";
 
 export type Rng = () => number;
 
-// ---------- arena scoring ----------
-
-/** round(1000 × (0.5 + 0.5 × timeLeft / timeLimit)) if correct, 0 if wrong. */
-export function speedPoints(correct: boolean, timeLeft: number, timeLimit: number): number {
-  if (!correct || timeLimit <= 0) return 0;
-  const left = Math.min(Math.max(timeLeft, 0), timeLimit);
-  return Math.round(1000 * (0.5 + (0.5 * left) / timeLimit));
-}
+// ---------- boss ----------
 
 export const BOSS_PASS_MARK = 6; // of 8
 
@@ -163,14 +156,18 @@ export function rankVibeCheck(quiz: VibeQuestion[], picks: (number | null)[]): V
 
 // ---------- Meet the Jobs ----------
 
-export interface ArenaItem {
+/** One question in a lesson-style round (Meet the Jobs, Boss, test-out). */
+export interface RoundItem {
   id: string;
   prompt: string;
   options: string[];
-  correctIndex: number | null; // null = no right answer (Vibe Check)
+  correctIndex: number;
   explanation?: string;
   source?: string;
   careerSlug?: string;
+  difficulty?: Question["difficulty"];
+  /** true when it's a real bank question that can be flagged (TOO EASY / REPORT) */
+  reportable?: boolean;
 }
 
 /** Pick `n` warm-up questions at random, always including the chosen career's, in random order. */
@@ -189,7 +186,7 @@ export function pickMeetTheJobs(
   return shuffle(picked, rng);
 }
 
-export function meetTheJobsToArena(q: MeetTheJobsQuestion, rng: Rng = Math.random): ArenaItem {
+export function meetTheJobsToItem(q: MeetTheJobsQuestion, rng: Rng = Math.random): RoundItem {
   const options = shuffle([q.answer, ...q.distractors], rng);
   return {
     id: q.career_slug,
@@ -200,7 +197,7 @@ export function meetTheJobsToArena(q: MeetTheJobsQuestion, rng: Rng = Math.rando
   };
 }
 
-export function questionToArena(q: Question, rng: Rng = Math.random): ArenaItem {
+export function questionToItem(q: Question, rng: Rng = Math.random): RoundItem {
   const s = shuffleOptions(q, rng);
   return {
     id: q.id,
@@ -209,6 +206,8 @@ export function questionToArena(q: Question, rng: Rng = Math.random): ArenaItem 
     correctIndex: s.correctIndex,
     explanation: q.explanation,
     source: q.source,
+    difficulty: q.difficulty,
+    reportable: true,
   };
 }
 
@@ -274,4 +273,46 @@ export function msUntilNextHeart(hearts: number, heartsUpdatedAt: string, now = 
 /** Lesson XP shown on the complete screen. */
 export function lessonAccuracy(firstTryCorrect: number, total: number): number {
   return total === 0 ? 0 : Math.round((firstTryCorrect / total) * 100);
+}
+
+// ---------- Match pairs ----------
+
+export interface PairCard {
+  slug: string;
+  text: string;
+}
+
+/**
+ * "Match the job": `n` careers (always including `mustInclude`), job titles on the left and
+ * one-liners on the right, each side shuffled independently.
+ */
+export function pickPairs<T extends { slug: string; job_title: string; one_liner: string }>(
+  careers: T[],
+  mustInclude: string | null,
+  n = 5,
+  rng: Rng = Math.random,
+): { left: PairCard[]; right: PairCard[] } {
+  const mine = careers.find((c) => c.slug === mustInclude);
+  const rest = shuffle(
+    careers.filter((c) => c !== mine),
+    rng,
+  );
+  const chosen = (mine ? [mine, ...rest] : rest).slice(0, n);
+  return {
+    left: shuffle(
+      chosen.map((c) => ({ slug: c.slug, text: c.job_title })),
+      rng,
+    ),
+    right: shuffle(
+      chosen.map((c) => ({ slug: c.slug, text: c.one_liner })),
+      rng,
+    ),
+  };
+}
+
+/** Unit test-out ("JUMP HERE?"): `n` questions drawn from the unit, passing needs `pass`. */
+export const TEST_OUT_SIZE = 6;
+export const TEST_OUT_PASS = 5;
+export function pickTestOut(questions: Question[], n = TEST_OUT_SIZE, rng: Rng = Math.random): Question[] {
+  return shuffle(questions, rng).slice(0, n);
 }

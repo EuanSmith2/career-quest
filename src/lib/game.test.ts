@@ -16,10 +16,11 @@ import {
   msUntilWeeklyReset,
   pathOffset,
   pickMeetTheJobs,
+  pickPairs,
+  pickTestOut,
   rankVibeCheck,
   shuffleOptions,
   sliceLessons,
-  speedPoints,
   weekStart,
 } from "./game";
 
@@ -47,21 +48,6 @@ const q = (id: string, difficulty: Question["difficulty"], answer_letter: Questi
   answer_letter,
   explanation: "",
   source: "",
-});
-
-describe("speedPoints", () => {
-  it("gives 1000 for an instant correct answer and 500 at the buzzer", () => {
-    expect(speedPoints(true, 20, 20)).toBe(1000);
-    expect(speedPoints(true, 0, 20)).toBe(500);
-    expect(speedPoints(true, 14.8, 20)).toBe(870);
-  });
-  it("gives 0 when wrong", () => {
-    expect(speedPoints(false, 20, 20)).toBe(0);
-  });
-  it("clamps out-of-range time", () => {
-    expect(speedPoints(true, 25, 20)).toBe(1000);
-    expect(speedPoints(true, -3, 20)).toBe(500);
-  });
 });
 
 describe("bossPassed", () => {
@@ -178,5 +164,26 @@ describe("time helpers", () => {
     const now = Date.parse("2026-10-09T12:00:00Z");
     expect(msUntilNextHeart(5, new Date(now).toISOString(), now)).toBeNull();
     expect(msUntilNextHeart(3, new Date(now - 10 * 60_000).toISOString(), now)).toBe(20 * 60_000);
+  });
+});
+
+describe("Match pairs", () => {
+  it("pairs 5 careers including yours, each side shuffled", () => {
+    for (let seed = 1; seed < 10; seed++) {
+      const { left, right } = pickPairs(CAREERS, "devsecops", 5, seeded(seed));
+      expect(left).toHaveLength(5);
+      expect(right).toHaveLength(5);
+      expect(left.some((c) => c.slug === "devsecops")).toBe(true);
+      expect(new Set(left.map((c) => c.slug))).toEqual(new Set(right.map((c) => c.slug)));
+    }
+  });
+});
+
+describe("Test-out", () => {
+  it("draws 6 distinct questions", () => {
+    const qs = Array.from({ length: 16 }, (_, i) => q(`E${i}`, "easy"));
+    const picked = pickTestOut(qs, 6, seeded(3));
+    expect(picked).toHaveLength(6);
+    expect(new Set(picked.map((x) => x.id)).size).toBe(6);
   });
 });

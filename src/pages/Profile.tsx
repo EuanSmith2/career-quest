@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Award, BookCheck, Flame, Gem, Snowflake, Volume2 } from "lucide-react";
+import { Award, BookCheck, Flame, Moon, Snowflake, Volume2, Zap } from "lucide-react";
 import {
   useBuyStreakFreeze,
   useCareer,
@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { CAREERS } from "@/data/careers";
 import { localDateKey } from "@/lib/game";
 import { useSound } from "@/lib/sound";
+import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 export default function Profile() {
@@ -36,6 +37,7 @@ export default function Profile() {
   const freeze = useBuyStreakFreeze();
   const reset = useResetDemoData();
   const sound = useSound();
+  const [theme, setTheme] = useTheme();
   const { openSaveProgress } = useAccountUi();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
@@ -100,8 +102,8 @@ export default function Profile() {
         <h2 className="mb-3 text-section">Statistics</h2>
         <div className="grid grid-cols-2 gap-3">
           <Stat icon={<Flame className="h-6 w-6 text-flame" fill="currentColor" />} value={p.streak} label="Day streak" />
-          <Stat icon={<Gem className="h-6 w-6 text-blue" fill="currentColor" />} value={p.xp} label="Total XP" />
-          <Stat icon={<BookCheck className="h-6 w-6 text-green" />} value={p.completed_lessons} label="Lessons done" />
+          <Stat icon={<Zap className="h-6 w-6 text-gold" fill="currentColor" />} value={p.xp} label="Total XP" />
+          <Stat icon={<BookCheck className="h-6 w-6 text-correct" />} value={p.completed_lessons} label="Lessons done" />
           <Stat icon={<Award className="h-6 w-6 text-gold" />} value={certs.data?.length ?? 0} label="Certificates" />
         </div>
       </section>
@@ -159,6 +161,28 @@ export default function Profile() {
 
       <section className="flex flex-col gap-3">
         <h2 className="text-section">Settings</h2>
+        <div className="flex items-center justify-between gap-3 rounded-card border-2 border-border p-4">
+          <span className="flex items-center gap-2 font-bold">
+            <Moon className="h-5 w-5 text-muted-foreground" /> Theme
+          </span>
+          <div className="flex gap-1" role="radiogroup" aria-label="Theme">
+            {(["midnight", "light"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                role="radio"
+                aria-checked={theme === t}
+                onClick={() => setTheme(t)}
+                className={cn(
+                  "rounded-btn border-2 px-3 py-1 text-caption font-extrabold capitalize",
+                  theme === t ? "border-blue-border bg-blue-soft text-selected-fg" : "border-border text-muted-foreground",
+                )}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="flex items-center justify-between gap-3 rounded-card border-2 border-border p-4">
           <span className="flex items-center gap-2 font-bold">
             <Volume2 className="h-5 w-5 text-muted-foreground" /> Sound effects
@@ -199,7 +223,7 @@ export default function Profile() {
       {reset && (
         <button
           type="button"
-          className="self-center text-caption font-bold text-muted-foreground underline hover:text-red-lip"
+          className="self-center text-caption font-bold text-muted-foreground underline hover:text-wrong-text"
           onClick={() => {
             if (confirm("Reset all demo data in this browser?")) reset.mutate(undefined, { onSuccess: () => (window.location.href = "/") });
           }}
@@ -295,7 +319,7 @@ function NotionSync() {
               : "Send your progress and study plan to Notion."}
       </p>
       {sync.data?.ok && sync.data.page_url && (
-        <a href={sync.data.page_url} target="_blank" rel="noreferrer" className="font-bold text-blue underline">
+        <a href={sync.data.page_url} target="_blank" rel="noreferrer" className="font-bold text-link underline">
           Open in Notion
         </a>
       )}

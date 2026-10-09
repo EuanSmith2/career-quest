@@ -7,7 +7,7 @@ export function Switch({ className, ...props }: React.ComponentPropsWithoutRef<t
     <SwitchPrimitive.Root
       className={cn(
         "peer inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors",
-        "data-[state=checked]:bg-green data-[state=unchecked]:bg-border disabled:cursor-not-allowed disabled:opacity-50",
+        "data-[state=checked]:bg-primary data-[state=unchecked]:bg-border disabled:cursor-not-allowed disabled:opacity-50",
         className,
       )}
       {...props}

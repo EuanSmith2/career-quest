@@ -16,17 +16,13 @@ export type SoundName =
   | "correct"
   | "wrong"
   | "heart-lost"
-  | "tick"
-  | "time-up"
   | "lesson-complete"
   | "boss-pass"
   | "boss-fail"
   | "chest-open"
   | "streak"
   | "achievement"
-  | "pair-match"
-  | "podium"
-  | "join";
+  | "pair-match";
 
 /** One map, so renaming a file is a one-line change. */
 export const SOUND_FILES: Record<SoundName, string> = {
@@ -34,8 +30,6 @@ export const SOUND_FILES: Record<SoundName, string> = {
   correct: "/sounds/correct.mp3",
   wrong: "/sounds/wrong.mp3",
   "heart-lost": "/sounds/heart-lost.mp3",
-  tick: "/sounds/tick.mp3",
-  "time-up": "/sounds/time-up.mp3",
   "lesson-complete": "/sounds/lesson-complete.mp3",
   "boss-pass": "/sounds/boss-pass.mp3",
   "boss-fail": "/sounds/boss-fail.mp3",
@@ -43,8 +37,6 @@ export const SOUND_FILES: Record<SoundName, string> = {
   streak: "/sounds/streak.mp3",
   achievement: "/sounds/achievement.mp3",
   "pair-match": "/sounds/pair-match.mp3",
-  podium: "/sounds/podium.mp3",
-  join: "/sounds/join.mp3",
 };
 
 export const SOUND_NAMES = Object.keys(SOUND_FILES) as SoundName[];
