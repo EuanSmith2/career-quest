@@ -41,6 +41,7 @@ export function Conversation({
   children,
   wide,
   hideProgress,
+  hideFooter,
 }: {
   step: number;
   steps: number;
@@ -52,6 +53,7 @@ export function Conversation({
   children: ReactNode;
   wide?: boolean;
   hideProgress?: boolean;
+  hideFooter?: boolean;
 }) {
   const said = useByteSays({ line });
   const ready = said.done && canContinue;
@@ -64,17 +66,19 @@ export function Conversation({
         </button>
         {!hideProgress && <ProgressBar value={step / steps} label={`Step ${step} of ${steps}`} knob />}
       </header>
-      <main className={cn("mx-auto flex w-full flex-1 flex-col px-4 pb-32 pt-6", wide ? "max-w-[900px]" : "max-w-app")}>
+      <main className={cn("mx-auto flex w-full flex-1 flex-col px-4 pt-6", hideFooter ? "pb-10" : "pb-32", wide ? "max-w-[900px]" : "max-w-app")}>
         {said.node}
         <div className={cn("transition-opacity duration-300", said.done ? "opacity-100" : "opacity-40")}>{children}</div>
       </main>
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t-2 border-border bg-background">
-        <div className={cn("mx-auto flex justify-end px-4 py-4 pb-[max(16px,env(safe-area-inset-bottom))]", wide ? "max-w-[900px]" : "max-w-app")}>
-          <ChunkyButton className="w-full sm:w-auto sm:min-w-[180px]" disabled={!ready} onClick={onContinue}>
-            {continueLabel}
-          </ChunkyButton>
+      {!hideFooter && (
+        <div className="fixed inset-x-0 bottom-0 z-10 border-t-2 border-border bg-background">
+          <div className={cn("mx-auto flex justify-end px-4 py-4 pb-[max(16px,env(safe-area-inset-bottom))]", wide ? "max-w-[900px]" : "max-w-app")}>
+            <ChunkyButton className="w-full sm:w-auto sm:min-w-[180px]" disabled={!ready} onClick={onContinue}>
+              {continueLabel}
+            </ChunkyButton>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -52,6 +52,7 @@ export default function Start() {
   const [goal, setGoal] = useState<Profile["daily_goal_xp"] | null>(null);
   const [placement, setPlacement] = useState<"scratch" | "find" | null>(null);
   const [step, setStep] = useState<Step | null>(null);
+  const [knows, setKnows] = useState(false); // "I already know what career I want" → show the grid
 
   if (isLoading) return <LoadingState className="mx-auto max-w-app px-4" />;
   const current: Step = step ?? (params.get("pick") === "1" || profile?.chosen_career ? "career" : "level");
@@ -154,34 +155,45 @@ export default function Start() {
       </Conversation>
     );
 
-  // career grid
+  // career step: two big choices first, then the grid for players who already know
+  const bigCard = "py-6";
   return (
     <Conversation
+      key={knows ? "grid" : "choose"}
       step={order.length}
       steps={order.length}
-      line="What do you want to be? Pick a job, or let me help you find one."
-      onBack={() => (step || !profile?.chosen_career ? back() : navigate(-1))}
-      canContinue={false}
+      line={knows ? "Which one? Pick your career." : "What do you want to be?"}
+      onBack={() => (knows ? setKnows(false) : step || !profile?.chosen_career ? back() : navigate(-1))}
       onContinue={() => undefined}
-      continueLabel="Pick a career"
       wide
       hideProgress
+      hideFooter
     >
-      {careers.isLoading ? (
-        <LoadingState label="Loading careers…" />
-      ) : careers.isError ? (
-        <ErrorState onRetry={() => careers.refetch()} />
-      ) : (
-        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 md:grid-cols-3">
-          <MagicCard color="var(--blue)" delay={0} highlight className="py-5 min-[400px]:col-span-2 md:col-span-3" onClick={() => navigate("/vibe-check")}>
+      {!knows ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <MagicCard color="var(--blue)" delay={0} highlight className={bigCard} onClick={() => navigate("/vibe-check")}>
             <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-blue text-[30px]">🤷</span>
             <span>
               <span className="block text-[20px] font-extrabold leading-tight text-selected-fg">I don't know yet 🤷</span>
               <span className="block text-[15px] text-muted-foreground">Take the 8-question Vibe Check and Byte will match you.</span>
             </span>
           </MagicCard>
+          <MagicCard color="var(--purple)" delay={0.08} className={bigCard} onClick={() => setKnows(true)}>
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-purple text-[30px]">🎯</span>
+            <span>
+              <span className="block text-[20px] font-extrabold leading-tight">I already know what career I want</span>
+              <span className="block text-[15px] text-muted-foreground">Pick it from the 12 cyber careers and start learning.</span>
+            </span>
+          </MagicCard>
+        </div>
+      ) : careers.isLoading ? (
+        <LoadingState label="Loading careers…" />
+      ) : careers.isError ? (
+        <ErrorState onRetry={() => careers.refetch()} />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 md:grid-cols-3">
           {careers.data?.map((c, i) => (
-            <MagicCard key={c.slug} color={c.color} delay={0.1 + i * 0.03} onClick={() => pickCareer(c.slug)}>
+            <MagicCard key={c.slug} color={c.color} delay={i * 0.03} onClick={() => pickCareer(c.slug)}>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-muted" style={{ color: c.color }}>
                 <CareerIcon name={c.icon} className="h-5 w-5" strokeWidth={2.4} />
               </span>
