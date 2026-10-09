@@ -142,8 +142,11 @@ export function playSound(name: SoundName) {
       // Still loading or missing: synthesise so the sound is never late or silent.
       SYNTH[name](ac, master);
     }
-  } catch {
-    /* never let a sound break the game */
+    // lets tests and analytics see which sound actually played
+    window.dispatchEvent(new CustomEvent("cq:sound", { detail: name }));
+  } catch (e) {
+    // never let a sound break the game, but don't hide the bug while developing
+    if (import.meta.env.DEV) console.warn(`sound "${name}" failed`, e);
   }
 }
 
