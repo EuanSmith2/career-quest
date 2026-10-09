@@ -27,3 +27,6 @@ npm run build
 No environment variables, no backend: data goes through `src/api/` to a localStorage mock that serves the
 480 questions in `share/questions.csv`. `/styleguide` shows every component, Byte's moods and the sounds.
 Sound is on by default (toggle it on /profile).
+
+**Sync to Notion:** copy `.env.example` to `.env.local`, add a Notion integration secret and a database shared with
+that integration, then restart `npm run dev`. Each player gets one page in the database with their stats and a study plan.

@@ -51,11 +51,21 @@ placeholders, so every career always has 16 easy, 16 medium and 8 hard questions
 | `getQuests` | `/quests`, Daily Quests card in the right rail | Earn the daily goal, 5 right in a row, a lesson at 90%+; computed from today's stats; `resets_at` = local midnight |
 | `listAchievements` | Profile badges grid; "Achievement unlocked" toast | 6 badges computed from progress; `unlocked_at` saved the first time each is earned |
 | `submitQuestionFeedback` | TOO EASY · TOO DIFFICULT · REPORT links on every feedback sheet | Appends to `cq.mock.feedback` |
-| `syncToNotion` | Profile → Sync to Notion | Waits 1.5 s; `{ok:true}` with **no** `page_url` 4 times in 5 (no real page exists, so the UI shows no link), an error 1 time in 5. The real backend should return the page's URL; the UI then shows "Open in Notion" |
+| `syncToNotion` | Profile → Sync to Notion | **Real.** Builds a progress summary (XP, streak, lessons, certificates, weakest career, 3-item study plan, TryHackMe link) and POSTs it to `/api/notion-sync`. `server/notionSync.ts` upserts one page per player in the Notion database. For the real backend, call the same handler from a Supabase Edge Function |
 | `battle` | Live Battle (Prompt 2) | `{}` placeholder |
 | `serverNow` | Live Battle, if it's built (on hold) | `Date.now()` |
 | `resetDemoData?` | Mock-only link in /profile | Clears every `cq.mock.*` key |
 | `refillHeartsForDemo?` | Mock-only "Refill hearts to 5 (demo)" on Out of hearts, the hearts popover and /profile | Hearts back to 5. Leave it undefined in the real API and the buttons disappear |
+
+## Notion sync (works now)
+
+`server/notionSync.ts` is server-side: the token never reaches the browser. In `npm run dev` and `npm run preview` it's
+served at `POST /api/notion-sync` by a small plugin in `vite.config.ts`. Setup: copy `.env.example` to `.env.local`
+and fill `NOTION_TOKEN` (integration secret) and `NOTION_DATABASE_ID` (link or ID of a database shared with the
+integration). The handler adds any missing properties to the database, then creates or updates the player's page by
+`Player ID`. On a static host there is no `/api`, so deploy the handler as a Supabase Edge Function (or Vercel
+function) and point the client at it. The endpoint trusts the posted numbers; the real backend should build the
+summary from its own tables instead.
 
 ## Rules the backend must enforce
 

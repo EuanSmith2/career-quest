@@ -7,6 +7,7 @@ import type {
   FeedbackKind,
   LeaderboardRow,
   LessonProgress,
+  NotionSyncResult,
   Profile,
   Quest,
   Session,
@@ -448,10 +449,51 @@ export const mockApi: CareerQuestApi = {
 
   // sponsor feature (Prompt 4)
   syncToNotion: async () => {
-    await new Promise((r) => setTimeout(r, 1500));
-    return Math.random() < 0.2
-      ? { ok: false, error: "Notion didn't respond. Try again in a moment." }
-      : { ok: true }; // no page_url: there's no real Notion page behind the mock, so the UI shows no link
+    // The mock still keeps data in the browser, but the sync itself is real: it posts a summary to
+    // the server-side /api/notion-sync (server/notionSync.ts), which holds the Notion token.
+    const p = loadProfile();
+    const progress = read<LessonProgress[]>("progress", []).filter((r) => !r.lesson_key.startsWith("chest") && r.lesson_key !== "boss");
+    const certs = read<Certificate[]>("certs", []).filter((c) => c.user_id === p.user_id);
+    const career = CAREERS.find((c) => c.slug === p.chosen_career) ?? null;
+    const nameOf = (slug: string) => CAREERS.find((c) => c.slug === slug)?.name ?? slug;
+
+    // weakest topic: the career with the lowest average lesson accuracy
+    const byCareer = new Map<string, number[]>();
+    for (const r of progress) byCareer.set(r.career_slug, [...(byCareer.get(r.career_slug) ?? []), r.best_accuracy]);
+    const avgs = [...byCareer].map(([slug, a]) => ({ slug, avg: Math.round(a.reduce((x, y) => x + y, 0) / a.length) })).sort((x, y) => x.avg - y.avg);
+    const weakest = avgs[0] ? `${nameOf(avgs[0].slug)} (average ${avgs[0].avg}%)` : null;
+
+    // study plan: the 3 lessons with the lowest accuracy
+    const lessonName = (key: string) =>
+      key.startsWith("review") ? `Unit ${key.endsWith("1") ? 1 : 2} review` : `Unit ${key.startsWith("easy") ? 1 : 2}, lesson ${key.split("-")[1]}`;
+    const study_plan = [...progress]
+      .sort((x, y) => x.best_accuracy - y.best_accuracy)
+      .slice(0, 3)
+      .map((r) => `Redo ${nameOf(r.career_slug)} · ${lessonName(r.lesson_key)} (best ${r.best_accuracy}%)`);
+
+    try {
+      const res = await fetch("/api/notion-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: p.user_id,
+          display_name: p.display_name,
+          career: career?.name ?? null,
+          xp: p.xp,
+          streak: p.streak,
+          completed_lessons: p.completed_lessons,
+          certificates: certs.length,
+          weakest_topic: weakest,
+          last_active: p.last_active,
+          study_plan,
+          thm_path: career?.thm_path ?? null,
+        }),
+      });
+      const body = (await res.json().catch(() => null)) as NotionSyncResult | null;
+      return body ?? { ok: false, error: `Sync server error (${res.status}).` };
+    } catch {
+      return { ok: false, error: "Couldn't reach the sync server. Is the app running with npm run dev or npm run preview?" };
+    }
   },
 
   // live battle (Prompt 2)
