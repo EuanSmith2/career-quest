@@ -11,6 +11,7 @@ import { GuestGate } from "@/components/GuestGate";
 import { useProfile } from "@/api/hooks";
 import { LoadingState } from "@/components/States";
 const Landing = lazy(() => import("@/pages/Landing"));
+const About = lazy(() => import("@/pages/About"));
 const Start = lazy(() => import("@/pages/Start"));
 const VibeCheck = lazy(() => import("@/pages/VibeCheck"));
 const Match = lazy(() => import("@/pages/Match"));
@@ -48,6 +49,7 @@ export default function App() {
               <Suspense fallback={<LoadingState className="mx-auto max-w-app px-4" />}>
                 <Routes>
                   <Route path="/" element={<Landing />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/styleguide" element={<Styleguide />} />
                   <Route path="/certificate/verify/:id" element={<CertificateVerify />} />
 
