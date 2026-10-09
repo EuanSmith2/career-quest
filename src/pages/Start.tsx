@@ -156,7 +156,6 @@ export default function Start() {
     );
 
   // career step: two big choices first, then the grid for players who already know
-  const bigCard = "py-6";
   return (
     <Conversation
       key={knows ? "grid" : "choose"}
@@ -170,20 +169,17 @@ export default function Start() {
       hideFooter
     >
       {!knows ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <MagicCard color="var(--blue)" delay={0} highlight className={bigCard} onClick={() => navigate("/vibe-check")}>
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-blue text-[30px]">🤷</span>
-            <span>
-              <span className="block text-[20px] font-extrabold leading-tight text-selected-fg">I don't know yet 🤷</span>
-              <span className="block text-[15px] text-muted-foreground">Take the 8-question Vibe Check and Byte will match you.</span>
-            </span>
+        // two big halves filling the screen under Byte, side by side, content centred
+        <div className="grid min-h-[calc(100dvh-210px)] grid-cols-2 gap-3 sm:gap-5">
+          <MagicCard color="var(--blue)" delay={0} highlight stack className="h-full" onClick={() => navigate("/vibe-check")}>
+            <span className="grid h-20 w-20 place-items-center rounded-[22px] bg-blue text-[44px] sm:h-28 sm:w-28 sm:text-[64px]">🤷</span>
+            <span className="block text-[22px] font-black leading-tight text-selected-fg sm:text-[32px]">I don't know yet</span>
+            <span className="block text-[15px] text-muted-foreground sm:text-body">Take the 8-question Vibe Check and Byte will match you.</span>
           </MagicCard>
-          <MagicCard color="var(--purple)" delay={0.08} className={bigCard} onClick={() => setKnows(true)}>
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-purple text-[30px]">🎯</span>
-            <span>
-              <span className="block text-[20px] font-extrabold leading-tight">I already know what career I want</span>
-              <span className="block text-[15px] text-muted-foreground">Pick it from the 12 cyber careers and start learning.</span>
-            </span>
+          <MagicCard color="var(--purple)" delay={0.08} stack className="h-full" onClick={() => setKnows(true)}>
+            <span className="grid h-20 w-20 place-items-center rounded-[22px] bg-purple text-[44px] sm:h-28 sm:w-28 sm:text-[64px]">🎯</span>
+            <span className="block text-[22px] font-black leading-tight sm:text-[32px]">I already know what career I want</span>
+            <span className="block text-[15px] text-muted-foreground sm:text-body">Pick it from the 12 cyber careers and start learning.</span>
           </MagicCard>
         </div>
       ) : careers.isLoading ? (
@@ -262,6 +258,7 @@ function MagicCard({
   color,
   delay,
   highlight,
+  stack,
   className,
   onClick,
   children,
@@ -269,6 +266,7 @@ function MagicCard({
   color: string;
   delay: number;
   highlight?: boolean;
+  stack?: boolean; // column layout, centred (the two big choices)
   className?: string;
   onClick: () => void;
   children: React.ReactNode;
@@ -286,7 +284,8 @@ function MagicCard({
         e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
       }}
       className={cn(
-        "chunky group relative flex items-center gap-3 overflow-hidden rounded-card border-2 px-3 py-2.5 text-left hover:-translate-y-1",
+        "chunky group relative flex items-center gap-3 overflow-hidden rounded-card border-2 text-left hover:-translate-y-1",
+        stack ? "justify-center p-4 sm:p-8" : "px-3 py-2.5",
         highlight ? "border-blue-border bg-blue-soft" : "border-border bg-background",
         className,
       )}
@@ -297,7 +296,7 @@ function MagicCard({
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
         style={{ background: `radial-gradient(180px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, ${color} 28%, transparent), transparent 70%)` }}
       />
-      <span className="relative flex items-center gap-3">{children}</span>
+      <span className={cn("relative flex gap-3", stack ? "w-full flex-col items-center justify-center gap-4 text-center" : "items-center")}>{children}</span>
     </motion.button>
   );
 }
