@@ -11,5 +11,6 @@ the mascot, the Lovable build prompts, the question bank and the design research
 | `LOVABLE-PROMPT.md`, `share/` | Build prompts for Lovable, and the shareable copy plus `questions.csv` |
 | `sounds/` | 18 synthesised sound effects (`sounds.ts`, no audio files). `open sounds/index.html` to hear them. Shareable (with files for a teammate's Claude): [sounds](https://claude.ai/artifact/5gihPvhSCWzYQtUSBHJBnS) · [Byte](https://claude.ai/artifact/5tRyCrdsTvdQmcxXJZRP93) |
 | `mascot/` | **Byte**, the mascot: one React component, 13 vector moods. See `mascot/README.md` |
+| `intro-v4/` | Pitch intro animation, "Career Quest Midnight" (black and blue, four scenes, hover for Replay / Fullscreen). `open intro-v4/index.html`, or the [live page](https://claude.ai/artifact/3rqNpZugYwf1dmn6rrqdY2) |
 | `data/raw/` | TryHackMe learning-path data used for the question bank |
 | `duolingo-teardown/` | Reference measurements and screens from a Duolingo lesson walkthrough |
