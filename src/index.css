@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* app (learning) surfaces */
+    --background: #ffffff;
+    --foreground: #4b4b4b; /* headings + main text */
+    --muted-foreground: #777777; /* body/secondary text */
+    --muted: #f7f7f7;
+    --border: #e5e5e5;
+    --info-bg: #ddf4ff; /* selected option, info panels */
+    --white: #ffffff;
+    --overlay: rgb(10 9 40 / 0.55); /* modal scrim, from --arena-deep */
+
+    /* brand */
+    --green: #58cc02;
+    --green-lip: #46a302;
+    --green-soft: #d7ffb8;
+    --blue: #1cb0f6;
+    --blue-lip: #1b99d6;
+    --blue-soft: #ddf4ff;
+    --blue-border: #84d8ff;
+    --blue-text: #1899d6; /* selected option text */
+    --red: #ff4b4b;
+    --red-lip: #ea2b2b;
+    --red-soft: #ffdfe0;
+    --gold: #ffc800;
+    --gold-lip: #e0a800;
+    --silver: #c0c8d2;
+    --silver-lip: #9aa4b1;
+    --bronze: #e0915a;
+    --bronze-lip: #b86f3f;
+    --flame: #ff9600; /* streak */
+    --disabled-bg: #e5e5e5;
+    --disabled-fg: #afafaf;
+
+    /* game arena (quiz mode) */
+    --arena: #100f3e;
+    --arena-deep: #0a0928;
+    --arena-card: #ffffff;
+    --arena-ink: #333333; /* question text on the white card */
+    --arena-glass: rgb(255 255 255 / 0.1); /* chips + panels on the arena */
+    --arena-line: rgb(255 255 255 / 0.18);
+    --arena-muted: rgb(255 255 255 / 0.75); /* secondary text on the arena */
+    --flash-correct: rgb(88 204 2 / 0.9); /* full-screen answer flash */
+    --flash-wrong: rgb(234 43 43 / 0.9);
+    --tile-red: #ea2b2b;
+    --tile-red-lip: #c41f1f;
+    --tile-blue: #1899d6;
+    --tile-blue-lip: #1482b8;
+    --tile-yellow: #ffc800;
+    --tile-yellow-lip: #e0a800; /* dark text (--foreground) on yellow */
+    --tile-green: #58a700;
+    --tile-green-lip: #468a00;
+
+    /* Byte (from byte.css) */
+    --byte-shadow: #dfe1ee;
+    --byte-backdrop: transparent;
+
+    --radius-btn: 12px;
+    --radius-card: 16px;
+    --radius-tile: 8px;
+    --lip: 4px;
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .dark {
+    --byte-shadow: #0d1518;
+    --byte-backdrop: #263840;
+  }
+
+  /* Byte stands on the dark arena: give him the dark-mode floor. */
+  .arena-surface {
+    --byte-shadow: #0d1518;
+    --byte-backdrop: #263840;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans text-body antialiased;
+    font-weight: 500;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 800;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--blue-border);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* The card lip: 2px border with a 4px bottom border. */
+  .lip-card {
+    @apply rounded-card border-2 bg-background;
+    border-bottom-width: var(--lip);
+  }
+
+  /* Faint dotted circuit grid on the arena (4% opacity). */
+  .circuit-grid {
+    background-color: var(--arena);
+    background-image: radial-gradient(rgb(255 255 255 / 0.04) 1.5px, transparent 1.5px),
+      linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+    background-size: 32px 32px, 64px 64px, 64px 64px;
+    background-position: 0 0, 16px 16px, 16px 16px;
+  }
+
+
+  /* The 3D lip: a 4px darker "bottom border" drawn as a hard shadow so pressing never shifts layout.
+     Set --lip-color on the element. :active presses it down and the lip goes to 0. */
+  .chunky {
+    box-shadow: 0 var(--lip) 0 var(--lip-color, var(--border));
+    margin-bottom: var(--lip);
+    transition: transform 0.1s, box-shadow 0.1s, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .chunky:hover:not(:disabled):not([aria-disabled="true"]) {
+    filter: brightness(1.05);
+  }
+  .chunky:active:not(:disabled):not([aria-disabled="true"]),
+  .chunky[data-pressed="true"] {
+    transform: translateY(var(--lip));
+    box-shadow: 0 0 0 var(--lip-color, var(--border));
+  }
+  .chunky:disabled,
+  .chunky[aria-disabled="true"] {
+    box-shadow: none;
+    transform: translateY(var(--lip));
+  }
+
+  .btn-text {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print only the certificate card. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  [data-print-card],
+  [data-print-card] * {
+    visibility: visible;
+  }
+  [data-print-card] {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+}
