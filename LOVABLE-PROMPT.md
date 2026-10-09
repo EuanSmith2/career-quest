@@ -376,7 +376,7 @@ Add a **Live Battle** mode for a room of players, using Supabase Realtime. This 
 
 ## PROMPT 3: polish and juice
 
-- **Sounds**: add optional soft sound effects (correct ding, wrong buzz, lesson-complete fanfare, timer tick for the last 5 seconds). Off by default, with a toggle in the profile.
+- **Sounds**: already in `src/lib/sounds.ts` and wired by Prompt 3S (`lovable-kit/prompt-3S-sounds.md`). Don't add any other sound code.
 - **Streak flame**: animated with a flicker loop. Add a "streak freeze" item bought with 200 XP.
 - **Daily goal**: a ring in the right rail that fills as XP comes in. At 100% it bursts into confetti.
 - **Mascot**: **Byte** is already installed at `src/components/Byte.tsx` (added straight after Prompt 1). Never draw, restyle or edit him. Use `<Byte mood="..." />` wherever a mascot appears. 15 moods, all vector: idle, talking, stare, smug, shocked, sad, locked-in, correct, wrong, level-up, coding, out-of-hearts, chest, wave, thinking. Mapping: right answer `correct`, wrong `wrong` (then back to `idle` after ~1.5s), lesson complete `level-up`, no hearts `out-of-hearts`, quiz countdown `locked-in`, boss reveal `shocked`, loading `coding`, streak kept `smug`, streak lost `sad`, /quests `chest`, learner idle 20s `stare`.
