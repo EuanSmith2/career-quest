@@ -1,6 +1,6 @@
 # Career Quest: Lovable build prompts
 
-Order: **Prompt 1** (the app) → **add Byte** (run `lovable-kit/install-byte.sh <repo>` once GitHub is connected, or paste `lovable-kit/prompt-1A-byte.md`) → **Prompt 1B** (Duolingo details + 21st.dev spin) → 2 (Live Battle) → 3 (polish) → 4 (Notion). Let each finish before sending the next.
+Order: **Prompt 1** (the app) → **add Byte** (run `lovable-kit/install-byte.sh <repo>` once GitHub is connected, or paste `lovable-kit/prompt-1A-byte.md`) → **Prompt 1B** (Duolingo details + 21st.dev spin) → 2 (Live Battle) → 2B (demo round, `lovable-kit/prompt-2B-demo-round.md`) → 3 (polish) → 4 (Notion). Let each finish before sending the next.
 Optional: attach Duolingo + Kahoot screenshots with Prompt 1, captioned "style reference only, don't copy logos, mascots or text" (Euan has them).
 After Prompt 1, open `/admin/import` in the app and upload `questions.csv` (attached, 480 questions from Risu's bank).
 
