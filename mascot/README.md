@@ -77,3 +77,11 @@ npx esbuild export-rig.tsx --bundle --platform=node --jsx=automatic --format=cjs
 - Same-colour sleeves over the hoodie vanish: front sleeves are one step lighter with a shade shape under them.
 - Headless Chrome won't lay out narrower than 500px and its virtual clock doesn't tick framer loops: test mobile
   in a 375px iframe and motion over CDP in real time.
+
+## Look tests (experimental)
+`looks/Byte.tsx` is a copy of `Byte.tsx` with an optional `look={{ glasses?: boolean; eagle?: boolean }}` prop.
+Without `look` it draws the original Byte, so it can replace `Byte.tsx` directly. `looks/demo/build.sh` builds
+the three playgrounds (glasses, eagle, both) into `looks/demo/dist/`.
+- Glasses: https://claude.ai/artifact/W5KHfizMvMnP3ejLRYFLJx
+- Eagle: https://claude.ai/artifact/7shL5LXbgVczwj3pRDMRVD
+- Eagle + glasses: https://claude.ai/artifact/JkanG9zMM1QJCy7xdqKXr5
