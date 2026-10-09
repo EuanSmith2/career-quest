@@ -40,6 +40,7 @@ export function Conversation({
   continueLabel = "Continue",
   children,
   wide,
+  hideProgress,
 }: {
   step: number;
   steps: number;
@@ -50,6 +51,7 @@ export function Conversation({
   continueLabel?: string;
   children: ReactNode;
   wide?: boolean;
+  hideProgress?: boolean;
 }) {
   const said = useByteSays({ line });
   const ready = said.done && canContinue;
@@ -60,7 +62,7 @@ export function Conversation({
         <button type="button" onClick={onBack} className="text-muted-foreground hover:text-foreground" aria-label="Back">
           <ArrowLeft className="h-7 w-7" strokeWidth={3} />
         </button>
-        <ProgressBar value={step / steps} label={`Step ${step} of ${steps}`} knob />
+        {!hideProgress && <ProgressBar value={step / steps} label={`Step ${step} of ${steps}`} knob />}
       </header>
       <main className={cn("mx-auto flex w-full flex-1 flex-col px-4 pb-32 pt-6", wide ? "max-w-[900px]" : "max-w-app")}>
         {said.node}

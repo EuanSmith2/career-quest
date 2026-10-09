@@ -26,4 +26,4 @@ npm run build
 
 No environment variables, no backend: data goes through `src/api/` to a localStorage mock that serves the
 480 questions in `share/questions.csv`. `/styleguide` shows every component, Byte's moods and the sounds.
-Sound is off by default (toggle in the arena or on /profile).
+Sound is on by default (toggle it on /profile).

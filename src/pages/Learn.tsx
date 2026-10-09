@@ -355,13 +355,15 @@ function PathNodeView({
                   style={{ height: h, border: `6px solid ${isBoss || node.kind === "chest" ? "var(--gold)" : career.color}` }}
                   aria-hidden
                 />
-                <span
-                  className="absolute -top-12 left-1/2 z-10 -translate-x-1/2 animate-float whitespace-nowrap rounded-btn border-2 border-border bg-background px-3 py-1.5 btn-text"
-                  style={{ color: isBoss || node.kind === "chest" ? "var(--gold)" : career.color }}
-                  aria-hidden
-                >
-                  {node.kind === "chest" ? "Open" : "Start"}
-                  <span className="absolute -bottom-[7px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-border bg-background" />
+                <span className="absolute -top-12 left-1/2 z-10 -translate-x-1/2" aria-hidden>
+                  {/* the float animation sits on an inner span so its transform can't undo the centring */}
+                  <span
+                    className="relative block animate-float whitespace-nowrap rounded-btn border-2 border-border bg-background px-3 py-1.5 btn-text"
+                    style={{ color: isBoss || node.kind === "chest" ? "var(--gold)" : career.color }}
+                  >
+                    {node.kind === "chest" ? "Open" : "Start"}
+                    <span className="absolute -bottom-[7px] left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-b-2 border-r-2 border-border bg-background" />
+                  </span>
                 </span>
               </>
             )}

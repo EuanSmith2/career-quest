@@ -165,6 +165,7 @@ export default function Start() {
       onContinue={() => undefined}
       continueLabel="Pick a career"
       wide
+      hideProgress
     >
       {careers.isLoading ? (
         <LoadingState label="Loading careers…" />

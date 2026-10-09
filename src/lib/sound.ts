@@ -1,5 +1,5 @@
 /**
- * Sound effects. Off by default; the choice lives in localStorage under `cq.sound` (client-side,
+ * Sound effects. On by default; the choice lives in localStorage under `cq.sound` (client-side,
  * not through the API). Audio unlocks on the first user gesture and never autoplays.
  *
  *   playSound("correct");
@@ -55,9 +55,9 @@ const listeners = new Set<() => void>();
 
 function readEnabled(): boolean {
   try {
-    return localStorage.getItem(STORAGE_KEY) === "on";
+    return localStorage.getItem(STORAGE_KEY) !== "off"; // on unless the player turned it off
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -155,7 +155,7 @@ export function useSound() {
       return () => listeners.delete(l);
     },
     () => enabled,
-    () => false,
+    () => true,
   );
   return { enabled: on, setEnabled: setSoundEnabled, toggle: () => setSoundEnabled(!on), play: playSound };
 }
