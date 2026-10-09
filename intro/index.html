@@ -1,0 +1,376 @@
+<title>Career Quest Intro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#131f24; --ink:#f1f7fb; --muted:#8a9ca6; --line:#37464f; --line-2:#2a3940;
+  --green:#93d333; --green-d:#79b933; --green-ink:#131f24;
+  --blue:#1cb0f6; --blue-bg:#1b2f3a; --blue-line:#3f85a7;
+  --gold:#ffc800; --gold-d:#e6a800; --red:#ff4b4b; --purple:#ce82ff;
+  --ease:cubic-bezier(.22,1,.36,1); --spring:cubic-bezier(.34,1.56,.64,1);
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Nunito","DIN Round","Varela Round",ui-rounded,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+#stage{position:relative;height:100%;width:100%;overflow:hidden}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .7s var(--ease),transform .9s var(--ease),filter .7s var(--ease);transform:scale(1.02);filter:blur(6px);padding-inline:16px}
+.scene.on{opacity:1;visibility:visible;transform:none;filter:none}
+.scene.out{opacity:0;transform:scale(.97);filter:blur(6px)}
+
+/* ---------- Keynote opener ---------- */
+#s-open{background:#000;align-items:center;justify-content:center;text-align:center}
+.kw{position:absolute;font-weight:900;font-size:clamp(40px,8.5vw,112px);letter-spacing:-.035em;line-height:1;opacity:0;filter:blur(18px);transform:translateY(24px) scale(.98);transition:all 1s var(--ease)}
+.kw.in{opacity:1;filter:none;transform:none}
+.kw.gone{opacity:0;filter:blur(18px);transform:translateY(-16px) scale(1.02)}
+.kw small{display:block;font-size:.26em;letter-spacing:.02em;font-weight:700;color:#86868b;margin-top:.7em}
+.kw .g{background:linear-gradient(180deg,#b6f05a,#58cc02);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---------- Brand reveal ---------- */
+#s-brand{background:radial-gradient(60% 50% at 50% 45%,#1d3a1a 0%,#000 70%);align-items:center;justify-content:center;gap:18px;text-align:center}
+#s-brand .byte{width:min(240px,46vw);transform:translateY(-120vh);transition:transform 1.1s var(--spring)}
+#s-brand.go .byte{transform:none}
+.wordmark{font-size:clamp(44px,8vw,96px);font-weight:900;letter-spacing:-.04em;color:var(--green);opacity:0;transform:translateY(20px);transition:all .9s .5s var(--ease)}
+.tag{font-size:clamp(17px,2.2vw,24px);font-weight:700;color:#a1a1a6;opacity:0;transform:translateY(12px);transition:all .9s .8s var(--ease);text-wrap:balance}
+#s-brand.go .wordmark,#s-brand.go .tag{opacity:1;transform:none}
+
+/* ---------- Duolingo-style onboarding chrome ---------- */
+.top{display:flex;align-items:center;gap:18px;max-width:1000px;width:100%;margin:0 auto;padding-top:28px}
+.top .x{color:var(--muted);font-size:22px;font-weight:800;width:20px}
+.bar{flex:1;height:16px;border-radius:99px;background:var(--line);position:relative}
+.bar i{position:absolute;inset:0 auto 0 0;width:0;border-radius:99px;background:var(--green);transition:width .8s var(--ease),background .4s}
+.bar i::after{content:"";position:absolute;left:8px;right:8px;top:4px;height:4px;border-radius:9px;background:rgba(255,255,255,.28)}
+.bar.gold i{background:var(--gold)}
+.hearts{color:var(--red);font-weight:900;display:flex;align-items:center;gap:6px;font-size:17px}
+.streakline{position:absolute;left:50%;transform:translateX(-50%);top:-20px;font-size:12px;font-weight:900;letter-spacing:.06em;color:var(--gold);opacity:0;transition:opacity .3s}
+.streakline.on{opacity:1}
+.body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;max-width:1000px;width:100%;margin:0 auto;padding-block:20px}
+.ask{display:flex;align-items:center;gap:14px;align-self:center;width:min(640px,100%)}
+.ask img{width:96px;flex:none}
+.bubble{position:relative;border:2px solid var(--line);border-radius:16px;padding:12px 16px;font-size:clamp(17px,2vw,21px);font-weight:700;min-height:1.6em;opacity:0;transform:scale(.8);transform-origin:left center;transition:all .45s var(--spring)}
+.bubble.on{opacity:1;transform:none}
+.bubble::before{content:"";position:absolute;left:-10px;top:50%;width:16px;height:16px;background:var(--bg);border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:translateY(-50%) rotate(45deg)}
+.foot{border-top:2px solid var(--line-2);padding:20px 0 28px}
+.foot .in{max-width:1000px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:52px}
+.btn{font:inherit;font-weight:900;font-size:15px;letter-spacing:.06em;text-transform:uppercase;border-radius:16px;padding:14px 40px;border:0;background:var(--line);color:#52656d;box-shadow:0 4px 0 var(--line-2);transition:background .25s,color .25s,box-shadow .1s,transform .1s}
+.btn.ready{background:var(--green);color:var(--green-ink);box-shadow:0 4px 0 var(--green-d)}
+.btn.blue{background:var(--blue);color:var(--green-ink);box-shadow:0 4px 0 #1899d6}
+.btn.press{transform:translateY(4px);box-shadow:0 0 0 transparent}
+.btn.ghost{background:transparent;border:2px solid var(--line);color:var(--muted);box-shadow:0 4px 0 var(--line-2);padding:12px 26px}
+
+/* option tiles */
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:min(820px,100%)}
+.opt{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px 14px;font-weight:800;font-size:15px;opacity:0;transform:translateY(14px);transition:opacity .45s var(--ease),transform .45s var(--ease),background .2s,border-color .2s,color .2s}
+.opt.on{opacity:1;transform:none}
+.opt .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;color:#fff}
+.opt .ic svg{width:20px;height:20px}
+.opt.sel{background:var(--blue-bg);border-color:var(--blue-line);color:var(--blue)}
+.opt.press{transform:translateY(2px)}
+.list{display:flex;flex-direction:column;gap:10px;width:min(440px,100%)}
+.lvl{display:flex;align-items:center;gap:14px;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:14px 16px;font-weight:800;font-size:16px;opacity:0;transform:translateY(12px);transition:opacity .45s var(--ease),transform .45s var(--ease),background .2s,border-color .2s,color .2s}
+.lvl.on{opacity:1;transform:none}
+.lvl.sel{background:var(--blue-bg);border-color:var(--blue-line);color:var(--blue)}
+.sig{display:flex;align-items:flex-end;gap:3px;height:18px}
+.sig b{width:5px;border-radius:2px;background:var(--line)}
+.sig b.f{background:var(--blue)}
+
+/* fun interstitial */
+#s-fun .body{gap:10px}
+#s-fun .bubble{transform-origin:center bottom;max-width:360px;text-align:center}
+#s-fun .bubble::before{left:50%;top:auto;bottom:-10px;transform:translateX(-50%) rotate(-45deg)}
+#s-fun img{width:min(200px,40vw)}
+
+/* lesson */
+.q{width:min(620px,100%);display:flex;flex-direction:column;gap:22px}
+.eyebrow{display:flex;align-items:center;gap:8px;color:var(--purple);font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.eyebrow i{width:18px;height:18px;border-radius:50%;background:var(--purple);display:inline-block}
+.q h2{margin:0;font-size:clamp(22px,3vw,30px);font-weight:900;text-wrap:balance}
+.mail{border:2px solid var(--line);border-radius:14px;padding:14px 16px;font-weight:700;font-size:15px;line-height:1.5;color:#c9d6dd}
+.mail .from{color:var(--muted);font-size:13px}
+.mail u{text-decoration-color:var(--red);text-decoration-thickness:2px;text-underline-offset:3px}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choices .opt{justify-content:center;text-align:center;font-size:15px;padding:16px 10px}
+.opt.good{background:#1f3a1a;border-color:var(--green-d);color:var(--green)}
+.verdict{position:absolute;inset:auto 0 0 0;background:#202f36;transform:translateY(100%);transition:transform .45s var(--ease);padding:20px 16px 28px}
+.verdict.on{transform:none}
+.verdict .in{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.verdict .msg{display:flex;align-items:center;gap:14px;color:var(--green);font-weight:900;font-size:22px}
+.verdict .tick{width:52px;height:52px;border-radius:50%;background:var(--ink);display:grid;place-items:center;flex:none}
+.verdict small{display:block;font-size:14px;font-weight:700;color:var(--muted);margin-top:2px}
+
+/* complete */
+#s-done .body{gap:20px}
+#s-done img{width:min(220px,44vw)}
+#s-done h2{margin:0;color:var(--gold);font-weight:900;font-size:clamp(26px,3.4vw,36px)}
+.stats{display:flex;gap:14px}
+.stat{border:2px solid var(--gold);border-radius:16px;overflow:hidden;min-width:130px;text-align:center;opacity:0;transform:scale(.6);transition:all .5s var(--spring)}
+.stat.on{opacity:1;transform:none}
+.stat b{display:block;background:var(--gold);color:var(--green-ink);font-size:12px;letter-spacing:.08em;padding:4px 0}
+.stat span{display:block;padding:12px;font-size:22px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums}
+.stat.g{border-color:var(--green)} .stat.g b{background:var(--green)} .stat.g span{color:var(--green)}
+
+/* streak */
+#s-streak{align-items:center;justify-content:center;gap:8px}
+.flame{width:150px;height:180px;transform:scale(0);transition:transform .8s var(--spring)}
+#s-streak.go .flame{transform:none}
+.count{font-size:clamp(90px,14vw,150px);font-weight:900;color:#ff9600;line-height:1;font-variant-numeric:tabular-nums}
+.streak-l{font-size:22px;font-weight:900;color:#ff9600;opacity:0;transition:opacity .6s .5s}
+#s-streak.go .streak-l{opacity:1}
+
+/* end card */
+#s-end{background:#000;align-items:center;justify-content:center;text-align:center;gap:22px}
+#s-end .wordmark,#s-end .tag{opacity:1;transform:none;transition:none}
+.end-ctas{display:flex;flex-direction:column;gap:12px;width:min(320px,100%);margin-top:6px}
+.btn.white{background:transparent;border:2px solid var(--line);color:var(--blue);box-shadow:0 4px 0 var(--line)}
+.end-ctas .btn{width:100%}
+.careers{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:640px}
+.careers span{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;animation:drift 4s ease-in-out infinite}
+.careers svg{width:20px;height:20px}
+@keyframes drift{50%{transform:translateY(-6px)}}
+
+/* fake cursor */
+#cursor{position:absolute;left:0;top:0;width:26px;height:26px;z-index:20;pointer-events:none;opacity:0;transition:transform .9s var(--ease),opacity .3s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+#cursor.on{opacity:1}
+#cursor.click{scale:.85}
+
+/* chrome */
+#hud{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:30;opacity:.0;transition:opacity .3s}
+#stage:hover #hud,#hud:focus-within{opacity:1}
+#hud button{font:inherit;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.08);color:#cfd8dc;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(10px)}
+#hud button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+@media (max-width:640px){
+  .grid,.choices{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid .opt:nth-child(n+7){display:none}
+  .ask img{width:64px}
+  .btn{padding:14px 26px}
+  .top{padding-top:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+
+<div id="stage" aria-live="polite">
+
+  <!-- 1. Keynote words -->
+  <section class="scene" id="s-open">
+    <div class="kw" id="k1">12 cyber careers.</div>
+    <div class="kw" id="k2">480 real questions.</div>
+    <div class="kw" id="k3"><span class="g">5 minutes</span> a day.</div>
+  </section>
+
+  <!-- 2. Brand -->
+  <section class="scene" id="s-brand">
+    <img class="byte" src="byte-wave.svg" alt="Byte, the Career Quest mascot, waving">
+    <div class="wordmark">career quest</div>
+    <div class="tag">Find your cyber career. Learn it in 5 minutes a day.</div>
+  </section>
+
+  <!-- 3. What do you want to be -->
+  <section class="scene" id="s-pick">
+    <div class="top"><span class="x">←</span><div class="bar"><i id="b-pick"></i></div></div>
+    <div class="body">
+      <div class="ask"><img src="byte-talking.svg" alt=""><div class="bubble" id="q-pick"></div></div>
+      <div class="grid" id="careerGrid"></div>
+    </div>
+    <div class="foot"><div class="in"><span></span><button class="btn" id="c-pick" tabindex="-1">Continue</button></div></div>
+  </section>
+
+  <!-- 4. How much do you know -->
+  <section class="scene" id="s-level">
+    <div class="top"><span class="x">←</span><div class="bar"><i id="b-level"></i></div></div>
+    <div class="body">
+      <div class="ask"><img src="byte-thinking.svg" alt=""><div class="bubble" id="q-level"></div></div>
+      <div class="list" id="levels"></div>
+    </div>
+    <div class="foot"><div class="in"><span></span><button class="btn" id="c-level" tabindex="-1">Continue</button></div></div>
+  </section>
+
+  <!-- 5. Fun like a game -->
+  <section class="scene" id="s-fun">
+    <div class="top"><span class="x">←</span><div class="bar"><i id="b-fun"></i></div></div>
+    <div class="body">
+      <div class="bubble" id="q-fun"></div>
+      <img src="byte-smug.svg" alt="">
+    </div>
+    <div class="foot"><div class="in"><span></span><button class="btn ready" id="c-fun" tabindex="-1">Continue</button></div></div>
+  </section>
+
+  <!-- 6. Lesson -->
+  <section class="scene" id="s-lesson">
+    <div class="top"><span class="x">✕</span><div class="bar" id="lbar"><i id="b-lesson"></i><span class="streakline" id="inrow">5 IN A ROW</span></div><span class="hearts">♥ 5</span></div>
+    <div class="body">
+      <div class="q">
+        <div class="eyebrow"><i></i>Penetration Tester · Unit 1</div>
+        <h2>What makes this email a phishing attempt?</h2>
+        <div class="mail"><div class="from">From: it-support@tud-helpdesk<u>.co</u></div>Your password expires <u>in 1 hour</u>. Verify now or lose access: <u>bit.ly/tud-login</u></div>
+        <div class="choices" id="choices">
+          <div class="opt">Fake domain + urgency</div>
+          <div class="opt">It mentions a password</div>
+          <div class="opt">It's from IT support</div>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><div class="in"><button class="btn ghost" tabindex="-1">Skip</button><button class="btn" id="c-check" tabindex="-1">Check</button></div></div>
+    <div class="verdict" id="verdict"><div class="in">
+      <div class="msg"><span class="tick"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#58a700" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div>Nice!<small>Source: CISA, “Avoiding Social Engineering and Phishing Attacks”</small></div></div>
+      <button class="btn ready" id="c-verdict" tabindex="-1">Continue</button>
+    </div></div>
+  </section>
+
+  <!-- 7. Lesson complete -->
+  <section class="scene" id="s-done">
+    <div class="body">
+      <img src="byte-level-up.svg" alt="">
+      <h2>Lesson Complete!</h2>
+      <div class="stats">
+        <div class="stat" id="st1"><b>TOTAL XP</b><span id="xp">0</span></div>
+        <div class="stat g" id="st2"><b>AMAZING</b><span id="acc">0%</span></div>
+      </div>
+    </div>
+    <div class="foot"><div class="in"><button class="btn ghost" tabindex="-1">Review lesson</button><button class="btn ready" id="c-done" tabindex="-1">Continue</button></div></div>
+  </section>
+
+  <!-- 8. Streak -->
+  <section class="scene" id="s-streak">
+    <svg class="flame" viewBox="0 0 100 120" aria-hidden="true"><path d="M50 4C58 26 84 40 84 74a34 34 0 0 1-68 0c0-16 8-26 14-32 2 10 7 15 12 16C38 40 42 20 50 4z" fill="#ff9600"/><path d="M50 52c6 10 18 16 18 32a18 18 0 0 1-36 0c0-10 6-16 10-20 2 6 4 8 7 8-2-8-1-14 1-20z" fill="#ffc800"/></svg>
+    <div class="count" id="streakN">0</div>
+    <div class="streak-l">day streak</div>
+  </section>
+
+  <!-- 9. End card -->
+  <section class="scene" id="s-end">
+    <div class="careers" id="endCareers"></div>
+    <div class="wordmark">career quest</div>
+    <div class="tag">Find your cyber career. Learn it in 5 minutes a day.</div>
+    <div class="end-ctas">
+      <button class="btn ready" tabindex="-1">Get started</button>
+      <button class="btn white" tabindex="-1">I already have an account</button>
+    </div>
+  </section>
+
+  <svg id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 10-7 1.5L9.5 21z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>
+
+  <div id="hud">
+    <button id="replay" type="button">Replay</button>
+    <button id="fs" type="button">Fullscreen</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  // lucide-style icon paths (stroke, 24 grid)
+  const P = {
+    radar:'<path d="M19.07 4.93A10 10 0 0 0 6.99 3.34"/><path d="M4 6h.01"/><path d="M2.29 9.62A10 10 0 1 0 21.31 8.35"/><path d="M16.24 7.76A6 6 0 1 0 8.23 16.67"/><path d="M12 18h.01"/><path d="M17.99 11.66A6 6 0 0 1 15.77 16.67"/><circle cx="12" cy="12" r="2"/><path d="m13.41 10.59 5.66-5.66"/>',
+    swords:'<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="M14.5 6.5 18 3h3v3l-3.5 3.5"/><path d="m5 14 4 4"/><path d="m7 17-3 3"/><path d="m3 19 2 2"/>',
+    siren:'<path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.93 4.93.71.71"/>',
+    bug:'<path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3 3 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6 13H2"/><path d="M22 13h-4"/>',
+    cloud:'<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+    terminal:'<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>',
+    network:'<rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/>',
+    shield:'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    briefcase:'<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+    lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    cpu:'<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/>',
+    bot:'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/>'
+  };
+  const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${P[k]}</svg>`;
+  const CAREERS = [
+    ['SOC Analyst','radar','#1cb0f6'],['Penetration Tester','swords','#ea2b2b'],['Incident Responder','siren','#ff9600'],
+    ['Malware Analyst','bug','#a560e8'],['Cloud Security','cloud','#1899d6'],['DevSecOps','terminal','#58a700'],
+    ['Network Security','network','#2b70c9'],['Security Engineer','shield','#58cc02'],['Security Consultant','briefcase','#ce82ff'],
+    ['IT Security','lock','#ffc800'],['IoT & Embedded','cpu','#00cd9c'],['AI Security','bot','#ff86d0']
+  ];
+  const grid = document.getElementById('careerGrid');
+  grid.innerHTML = CAREERS.slice(0,9).map(([n,i,c]) => `<div class="opt"><span class="ic" style="background:${c}">${icon(i)}</span>${n}</div>`).join('');
+  document.getElementById('endCareers').innerHTML = CAREERS.map(([n,i,c],k) => `<span title="${n}" style="background:${c};animation-delay:${-k*.33}s">${icon(i)}</span>`).join('');
+  const LEVELS = ["I'm new to cyber","I know a few terms","I've done some TryHackMe","I can explain an attack","I could teach this"];
+  document.getElementById('levels').innerHTML = LEVELS.map((t,k) => `<div class="lvl"><span class="sig">${[0,1,2,3].map(b=>`<b class="${b<=k-1||k===0&&b===0?'f':''}" style="height:${6+b*4}px"></b>`).join('')}</span>${t}</div>`).join('');
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const stage = $('#stage'), cur = $('#cursor');
+  let run = 0;
+  const wait = (ms, id) => new Promise((res, rej) => setTimeout(() => id === run ? res() : rej('stop'), ms));
+
+  function show(id){
+    $$('.scene.on').forEach(s => { s.classList.remove('on'); s.classList.add('out'); setTimeout(()=>s.classList.remove('out'),800); });
+    const s = $(id); s.classList.remove('out'); s.classList.add('on'); return s;
+  }
+  async function type(el, text, id){
+    el.textContent=''; el.classList.add('on'); await wait(250,id);
+    for (const ch of text){ el.textContent += ch; await wait(28,id); }
+  }
+  function cursorTo(el){
+    const r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect();
+    cur.style.transform = `translate(${r.left - sr.left + r.width*0.62}px, ${r.top - sr.top + r.height*0.55}px)`;
+  }
+  async function click(el, id){
+    cursorTo(el); cur.classList.add('on'); await wait(950,id);
+    cur.classList.add('click'); el.classList.add('press'); await wait(140,id);
+    cur.classList.remove('click'); el.classList.remove('press');
+  }
+  async function stagger(els, ms, id){ for (const e of els){ e.classList.add('on'); await wait(ms,id); } }
+  function reset(){
+    $$('.scene').forEach(s=>s.classList.remove('on','out','go'));
+    $$('.kw').forEach(k=>k.classList.remove('in','gone'));
+    $$('.bubble,.opt,.lvl,.stat,.verdict,.streakline').forEach(e=>e.classList.remove('on','sel','good'));
+    $$('.bar i').forEach(b=>b.style.width='0'); $('#lbar').classList.remove('gold');
+    $$('.btn').forEach(b=>b.classList.remove('ready','press'));
+    $('#c-fun').classList.add('ready'); $('#c-verdict').classList.add('ready'); $('#c-done').classList.add('ready');
+    $$('#s-end .btn')[0].classList.add('ready');
+    cur.classList.remove('on'); $('#xp').textContent='0'; $('#acc').textContent='0%'; $('#streakN').textContent='0';
+  }
+  async function count(el, to, suffix, ms, id){
+    const t0 = performance.now();
+    while (true){ const p = Math.min(1,(performance.now()-t0)/ms); el.textContent = Math.round(to*(1-Math.pow(1-p,3)))+suffix; if(p>=1)break; await wait(16,id); }
+  }
+
+  async function play(){
+    const id = ++run; reset();
+    try{
+      // 1 keynote words
+      show('#s-open'); await wait(500,id);
+      for (const k of ['#k1','#k2','#k3']){ $(k).classList.add('in'); await wait(1500,id); $(k).classList.add('gone'); await wait(350,id); }
+      // 2 brand
+      const b = show('#s-brand'); await wait(200,id); b.classList.add('go'); await wait(3000,id);
+      // 3 career pick
+      show('#s-pick'); await wait(300,id); $('#b-pick').style.width='20%';
+      await type($('#q-pick'),'What do you want to be?',id);
+      await stagger($$('#careerGrid .opt'),70,id); await wait(500,id);
+      const pt = $$('#careerGrid .opt')[1]; await click(pt,id); pt.classList.add('sel'); $('#c-pick').classList.add('ready'); await wait(500,id);
+      await click($('#c-pick'),id);
+      // 4 level
+      show('#s-level'); $('#b-level').style.width='20%'; await wait(300,id); $('#b-level').style.width='45%';
+      await type($('#q-level'),'How much do you know about cyber?',id);
+      await stagger($$('#levels .lvl'),90,id); await wait(400,id);
+      const lv = $$('#levels .lvl')[2]; await click(lv,id); lv.classList.add('sel'); $('#c-level').classList.add('ready'); await wait(450,id);
+      await click($('#c-level'),id);
+      // 5 fun
+      cur.classList.remove('on'); show('#s-fun'); $('#b-fun').style.width='45%'; await wait(300,id); $('#b-fun').style.width='75%';
+      await type($('#q-fun'),'…so Career Quest is built to feel like a game!',id); await wait(1300,id);
+      // 6 lesson
+      show('#s-lesson'); $('#b-lesson').style.width='55%'; await wait(600,id);
+      await stagger($$('#choices .opt'),110,id); await wait(700,id);
+      const right = $$('#choices .opt')[0]; await click(right,id); right.classList.add('sel'); $('#c-check').classList.add('ready'); await wait(400,id);
+      await click($('#c-check'),id); right.classList.remove('sel'); right.classList.add('good');
+      $('#verdict').classList.add('on'); $('#b-lesson').style.width='100%'; $('#lbar').classList.add('gold'); $('#inrow').classList.add('on');
+      cur.classList.remove('on'); await wait(1800,id);
+      // 7 done
+      show('#s-done'); await wait(500,id);
+      $('#st1').classList.add('on'); count($('#xp'),15,'',900,id).catch(()=>{}); await wait(250,id);
+      $('#st2').classList.add('on'); await count($('#acc'),100,'%',900,id); await wait(1300,id);
+      // 8 streak
+      const st = show('#s-streak'); await wait(200,id); st.classList.add('go'); await wait(700,id); $('#streakN').textContent='1'; await wait(1800,id);
+      // 9 end
+      show('#s-end'); await wait(6000,id);
+      play();
+    }catch(e){ /* superseded by replay */ }
+  }
+
+  $('#replay').addEventListener('click', e => { e.stopPropagation(); play(); });
+  $('#fs').addEventListener('click', e => { e.stopPropagation(); (document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen?.())?.catch?.(()=>{}); });
+  document.addEventListener('keydown', e => { if (e.key==='r'||e.key==='R') play(); if (e.key==='f'||e.key==='F') $('#fs').click(); });
+  play();
+})();
+</script>
