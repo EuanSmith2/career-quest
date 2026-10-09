@@ -33,7 +33,9 @@ Fri 9 Oct, 13:00–20:00. Everything here is ready; this is the order to do it i
 **Route B, paste (no GitHub):** paste all of `lovable-kit/prompt-1A-byte.md` below the line as one message.
 
 ## 3. Finish the build
-Send in order, each after the last finishes: **Prompt 1B** → **Prompt 2** (Live Battle) → **Prompt 2B** (`lovable-kit/prompt-2B-demo-round.md`) → run `./lovable-kit/install-sounds.sh <repo url>` → **Prompt 3** (polish) → **Prompt 3S** sounds (`lovable-kit/prompt-3S-sounds.md`) → **Prompt 4** (Notion).
+Send in order, each after the last finishes: **Prompt 1B** → **Prompt 2** (Live Battle) → **Prompt 2B** (`lovable-kit/prompt-2B-demo-round.md`) → **Prompt 2C** anti-cheat (`lovable-kit/prompt-2C-anti-cheat.md`, then run its checks at `/admin/security`) → run `./lovable-kit/install-sounds.sh <repo url>` → **Prompt 3** (polish) → **Prompt 3S** sounds (`lovable-kit/prompt-3S-sounds.md`) → **Prompt 4** (Notion) → **Prompt 5** questions from Notion (`lovable-kit/prompt-5-notion-questions.md`, needs the setup at its top).
+
+Before submitting: copy `lovable-kit/APP-README.md` over the Lovable repo's `README.md`, fill the brackets, and add one screenshot.
 Open `/admin/import` in the app and upload `share/questions.csv` (480 questions) as soon as Prompt 1 is done.
 
 ⚠️ **Use the Demo round for anything judges see.** In 379 of the 480 questions the correct answer is the longest option, so a random battle can be won by always picking the longest. The 10 demo questions (`lovable-kit/demo-battle.csv`) were picked so it never is.
