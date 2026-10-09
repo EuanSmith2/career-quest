@@ -309,16 +309,17 @@ export default function Landing() {
       </section>
 
       {/* career strip */}
-      <nav className="border-y-2 border-border py-3" aria-label="Careers">
+      {/* purely decorative career strip: not clickable or focusable */}
+      <div className="pointer-events-none select-none border-y-2 border-border py-3" aria-hidden>
         <Marquee>
           {careers.map((c) => (
-            <button key={c.slug} type="button" onClick={getStarted} className="flex shrink-0 items-center gap-2 rounded-btn px-3 py-2 btn-text text-muted-foreground hover:bg-muted">
+            <span key={c.slug} className="flex shrink-0 items-center gap-2 px-3 py-2 btn-text text-muted-foreground">
               <CareerIcon name={c.icon} className="h-6 w-6" style={{ color: c.color }} strokeWidth={2.4} />
               {SHORT_NAMES[c.slug]}
-            </button>
+            </span>
           ))}
         </Marquee>
-      </nav>
+      </div>
 
       {/* split sections */}
       <section className="mx-auto grid max-w-landing items-center gap-10 px-4 py-20 md:grid-cols-2">
