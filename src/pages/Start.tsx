@@ -171,8 +171,15 @@ export default function Start() {
         <ErrorState onRetry={() => careers.refetch()} />
       ) : (
         <div className="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 md:grid-cols-3">
+          <MagicCard color="var(--blue)" delay={0} highlight className="py-5 min-[400px]:col-span-2 md:col-span-3" onClick={() => navigate("/vibe-check")}>
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[14px] bg-blue text-[30px]">🤷</span>
+            <span>
+              <span className="block text-[20px] font-extrabold leading-tight text-selected-fg">I don't know yet 🤷</span>
+              <span className="block text-[15px] text-muted-foreground">Take the 8-question Vibe Check and Byte will match you.</span>
+            </span>
+          </MagicCard>
           {careers.data?.map((c, i) => (
-            <MagicCard key={c.slug} color={c.color} delay={i * 0.03} onClick={() => pickCareer(c.slug)}>
+            <MagicCard key={c.slug} color={c.color} delay={0.1 + i * 0.03} onClick={() => pickCareer(c.slug)}>
               <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-muted" style={{ color: c.color }}>
                 <CareerIcon name={c.icon} className="h-5 w-5" strokeWidth={2.4} />
               </span>
@@ -182,13 +189,6 @@ export default function Start() {
               </span>
             </MagicCard>
           ))}
-          <MagicCard color="var(--blue)" delay={0.4} highlight className="min-[400px]:col-span-2 md:col-span-3" onClick={() => navigate("/vibe-check")}>
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-blue text-[18px]">🤷</span>
-            <span>
-              <span className="block text-[14px] font-extrabold text-selected-fg">I don't know yet 🤷</span>
-              <span className="block text-[13px] text-muted-foreground">Take the 8-question Vibe Check and Byte will match you.</span>
-            </span>
-          </MagicCard>
         </div>
       )}
     </Conversation>
