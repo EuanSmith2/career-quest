@@ -1,3 +1,0 @@
-/* Byte mascot: floor shadow + dark-mode backdrop */
-:root { --byte-shadow: #dfe1ee; --byte-backdrop: transparent; }
-.dark { --byte-shadow: #0d1518; --byte-backdrop: #263840; }

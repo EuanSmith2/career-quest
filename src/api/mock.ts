@@ -446,7 +446,7 @@ export const mockApi: CareerQuestApi = {
       write("feedback", [...read<unknown[]>("feedback", []), { ...f, at: nowIso() }]);
     }),
 
-  // sponsor feature (Prompt 4)
+  // sponsor feature
   syncToNotion: async () => {
     await new Promise((r) => setTimeout(r, 1500));
     return Math.random() < 0.2
@@ -454,7 +454,7 @@ export const mockApi: CareerQuestApi = {
       : { ok: true }; // no page_url: there's no real Notion page behind the mock, so the UI shows no link
   },
 
-  // live battle (Prompt 2)
+  // live battle
   battle: {},
   serverNow: () => Date.now(),
 
