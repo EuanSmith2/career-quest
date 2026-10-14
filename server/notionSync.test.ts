@@ -1,7 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { describe, expect, it } from "vitest";
 import { parseSyncPayload } from "./notionSync";
-import { isAllowedSyncRequest } from "./syncGuard";
+import { isAllowedSyncRequest, isSameOriginSyncRequest } from "./syncGuard";
 
 const req = (headers: Record<string, string>) => ({ headers }) as unknown as IncomingMessage;
 const without = (h: Record<string, string>, key: string) => Object.fromEntries(Object.entries(h).filter(([k]) => k !== key));
@@ -33,6 +33,21 @@ describe("isAllowedSyncRequest", () => {
     expect(
       isAllowedSyncRequest(req({ ...ok, host: "rebind.attacker.example:8080", origin: "http://rebind.attacker.example:8080" })),
     ).toBe(false);
+  });
+});
+
+describe("isSameOriginSyncRequest (Vercel)", () => {
+  const prod = { ...ok, host: "career-quest.vercel.app", origin: "https://career-quest.vercel.app" };
+  it("lets the deployed app's own page through", () => {
+    expect(isSameOriginSyncRequest(req(prod))).toBe(true);
+  });
+  it("blocks other sites and the text/plain trick", () => {
+    expect(isSameOriginSyncRequest(req({ ...prod, origin: "https://evil.example" }))).toBe(false);
+    expect(isSameOriginSyncRequest(req({ ...prod, "content-type": "text/plain" }))).toBe(false);
+    expect(isSameOriginSyncRequest(req(without(prod, "x-cq-sync")))).toBe(false);
+  });
+  it("is not enough on its own for local dev", () => {
+    expect(isAllowedSyncRequest(req(prod))).toBe(false);
   });
 });
 
