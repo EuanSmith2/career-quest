@@ -93,12 +93,12 @@ export interface CareerQuestApi {
   /** Store a player's flag on a question (too easy, wrong answer, bad source…). */
   submitQuestionFeedback(f: { question_id: string; kind: FeedbackKind }): Promise<void>;
 
-  // ---------- sponsor feature (Prompt 4) ----------
+  // ---------- sponsor feature ----------
 
   /** Push the caller's progress to their Notion page. */
   syncToNotion(): Promise<NotionSyncResult>;
 
-  // ---------- live battle (Prompt 2) ----------
+  // ---------- live battle ----------
 
   battle: BattleApi;
   /** ms epoch from the server clock; the mock returns Date.now(). */

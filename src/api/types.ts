@@ -125,5 +125,5 @@ export interface NotionSyncResult {
   error?: string;
 }
 
-// Live Battle types are in Prompt 2. Placeholder so the interface compiles until then.
+// Live Battle types: placeholder so the interface compiles.
 export type BattleApi = Record<string, never>;

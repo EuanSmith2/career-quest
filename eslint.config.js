@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'mascot', 'sounds', 'lovable-kit', 'src/components/Byte.tsx'] },
+  { ignores: ['dist', 'mascot', 'sounds', 'src/components/Byte.tsx'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

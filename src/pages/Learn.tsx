@@ -26,7 +26,7 @@ const UNITS = [
 
 type NodeState = "done" | "current" | "locked";
 
-/** Zig-zag offsets: Prompt 1's 7-step sine on wider screens, the video's 0/44/66 on phones. */
+/** Zig-zag offsets: a 7-step sine on wider screens, 0/44/66 on phones. */
 const OFFSETS_WIDE = [0, -40, -70, -40, 0, 40, 70, 40];
 const OFFSETS_PHONE = [0, -44, -66, -44, 0, 44, 66, 44];
 
