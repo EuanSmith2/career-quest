@@ -69,7 +69,9 @@ async function respond<T>(fn: () => T): Promise<T> {
 // The question bank is ~270 KB; load it on first use so it stays out of the main bundle.
 const loadQuestions = () => import("@/data/fixtures/questions").then((m) => m.QUESTION_FIXTURES);
 
-const uid = (prefix: string) => `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+// crypto-random, not Math.random: these IDs pick the player's Notion page and name certificates
+const uid = (prefix: string) =>
+  `${prefix}_${Array.from(crypto.getRandomValues(new Uint8Array(8)), (b) => b.toString(16).padStart(2, "0")).join("")}`;
 const nowIso = () => new Date().toISOString();
 
 // ---------- stored shapes ----------
@@ -243,7 +245,9 @@ export const mockApi: CareerQuestApi = {
       const existing = read<Session | null>("session", null);
       const session = existing ?? { user_id: uid("guest"), is_guest: true, email: null };
       write("session", session);
-      const p = read<Profile | null>("profile", null) ?? freshProfile(session.user_id, nickname);
+      // never pick up a profile left behind by a different user on this browser
+      const stored = read<Profile | null>("profile", null);
+      const p = stored && stored.user_id === session.user_id ? stored : freshProfile(session.user_id, nickname);
       p.display_name = nickname.trim().slice(0, 24) || p.display_name;
       write("profile", p);
       return session;
@@ -259,7 +263,8 @@ export const mockApi: CareerQuestApi = {
       write("profile", p);
     }),
 
-  signOut: () => respond(() => write("session", null)),
+  // The real backend keeps the account's data. Locally, wipe it so the next person on this browser starts clean.
+  signOut: () => respond(() => clearAll()),
 
   // content
   listCareers: () => respond(() => CAREERS),
@@ -274,7 +279,12 @@ export const mockApi: CareerQuestApi = {
 
   updateProfile: (patch) =>
     respond(() => {
-      const p = { ...loadProfile(), ...patch };
+      // only the editable fields, same limits as the inputs (the type alone doesn't stop extra keys at runtime)
+      const p = loadProfile();
+      if (typeof patch.display_name === "string") p.display_name = patch.display_name.trim().slice(0, 24) || p.display_name;
+      if (patch.chosen_career !== undefined) p.chosen_career = patch.chosen_career;
+      if (patch.daily_goal_xp !== undefined) p.daily_goal_xp = patch.daily_goal_xp;
+      if (patch.starting_level !== undefined) p.starting_level = patch.starting_level;
       write("profile", p);
       return p;
     }),

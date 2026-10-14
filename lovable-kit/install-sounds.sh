@@ -15,7 +15,8 @@ TARGET="${1:?usage: install-sounds.sh <lovable repo url or local clone>}"
 
 if [ -d "$TARGET/.git" ]; then
   REPO="$(cd "$TARGET" && pwd)"
-  git -C "$REPO" pull --quiet --ff-only 2>/dev/null || true
+  [ -z "$(git -C "$REPO" status --porcelain)" ] || { echo "$REPO has uncommitted changes. Commit or stash them first." >&2; exit 1; }
+  git -C "$REPO" pull --quiet --ff-only || { echo "Couldn't fast-forward $REPO. Sort out the branch first." >&2; exit 1; }
 else
   REPO="$(mktemp -d)/app"
   git clone --quiet "$TARGET" "$REPO"
@@ -32,10 +33,10 @@ if git diff --cached --quiet; then
   echo "Sounds are already up to date in $REPO"
   exit 0
 fi
-git commit --quiet -m "Add synthesised sound effects"
+git commit --quiet -m "Add synthesised sound effects" -- src/lib/sounds.ts
 if [ "${NO_PUSH:-}" = "1" ]; then
   echo "Committed in $REPO (not pushed)"
 else
-  git push --quiet
+  git push --quiet origin "HEAD:$(git rev-parse --abbrev-ref HEAD)"
   echo "Pushed sounds to $(git remote get-url origin). Now send lovable-kit/prompt-3S-sounds.md."
 fi

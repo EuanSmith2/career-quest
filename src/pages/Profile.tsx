@@ -29,6 +29,17 @@ import { useSound } from "@/lib/sound";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
+/** Only link out to an https Notion page. */
+function isNotionUrl(url: string | undefined): url is string {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "https:" && /(^|\.)notion\.(so|site)$/.test(u.hostname);
+  } catch {
+    return false;
+  }
+}
+
 export default function Profile() {
   const profile = useProfile();
   const { data: session } = useSession();
@@ -358,7 +369,7 @@ function NotionSync() {
               ? sync.data.error
               : "Send your progress and study plan to Notion."}
       </p>
-      {sync.data?.ok && sync.data.page_url && (
+      {sync.data?.ok && isNotionUrl(sync.data.page_url) && (
         <a href={sync.data.page_url} target="_blank" rel="noreferrer" className="font-bold text-link underline">
           Open in Notion
         </a>

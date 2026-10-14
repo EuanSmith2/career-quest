@@ -7,7 +7,10 @@ import { ChunkyButton } from "@/components/ChunkyButton";
 import { Logo } from "@/components/Logo";
 import { ErrorState, LoadingState } from "@/components/States";
 
-/** Public, read-only certificate view. */
+/**
+ * Read-only certificate view. With the mock API, certificates live in the browser that earned them,
+ * so this page can only confirm one it finds locally. Say so instead of claiming public verification.
+ */
 export default function CertificateVerify() {
   const { id = "" } = useParams();
   const cert = useCertificate(id);
@@ -36,7 +39,10 @@ export default function CertificateVerify() {
         ) : (
           <>
             <p className="flex items-center justify-center gap-2 rounded-full bg-correct-soft px-4 py-2 font-extrabold text-correct-text">
-              <BadgeCheck className="h-5 w-5" /> Verified Career Quest certificate
+              <BadgeCheck className="h-5 w-5" /> Career Quest certificate (saved in this browser)
+            </p>
+            <p className="text-center text-caption text-muted-foreground">
+              Public verification arrives with the online version. For now this only confirms certificates earned on this device.
             </p>
             <CertificateCard cert={cert.data} career={career.data} />
           </>
