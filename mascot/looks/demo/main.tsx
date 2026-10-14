@@ -26,7 +26,9 @@ function LookStrip() {
     <nav className="looks" aria-label="Other looks">
       {LOOKS.map((l) => {
         const here = l.id === ME.id;
-        const href = __LINKS__[l.id];
+        const raw = __LINKS__[l.id];
+        // LINKS comes from the build environment: only ever link out over https
+        const href = typeof raw === "string" && raw.startsWith("https://") ? raw : undefined;
         const body = (
           <>
             <Byte mood={here ? "wave" : "idle"} size={84} look={l.look} />

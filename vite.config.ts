@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
-  server: { host: "::", port: 8080 },
+  // localhost only. For phone testing on the same wifi, run `npm run dev -- --host` on a network you trust.
+  server: { host: "localhost", port: 8080 },
   test: { include: ["src/**/*.test.ts"] },
 });
