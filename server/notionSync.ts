@@ -55,6 +55,45 @@ export function normaliseDatabaseId(raw: string): string {
   return hex ? hex[0] : raw.trim();
 }
 
+const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+const str = (v: unknown, max: number) => {
+  if (typeof v !== "string" || v.length > max) throw new Error("bad string");
+  return v;
+};
+const strOrNull = (v: unknown, max: number) => (v === null || v === undefined ? null : str(v, max));
+const count = (v: unknown) => {
+  if (typeof v !== "number" || !Number.isInteger(v) || v < 0 || v > 1e7) throw new Error("bad number");
+  return v;
+};
+
+/**
+ * Check every field before anything touches Notion: right types, sane sizes, a Player ID in the
+ * shape the app makes, a real date, and a TryHackMe link only. Throws on anything else.
+ */
+export function parseSyncPayload(v: unknown): NotionSyncPayload {
+  if (!isObj(v)) throw new Error("bad payload");
+  const user_id = str(v.user_id, 32);
+  if (!/^guest_[a-z0-9]{1,16}$/.test(user_id)) throw new Error("bad user_id");
+  const last_active = strOrNull(v.last_active, 10);
+  if (last_active !== null && !/^\d{4}-\d{2}-\d{2}$/.test(last_active)) throw new Error("bad date");
+  const thm_path = strOrNull(v.thm_path, 300);
+  if (thm_path !== null && !thm_path.startsWith("https://tryhackme.com/")) throw new Error("bad link");
+  if (!Array.isArray(v.study_plan) || v.study_plan.length > 10) throw new Error("bad plan");
+  return {
+    user_id,
+    display_name: str(v.display_name, 200),
+    career: strOrNull(v.career, 200),
+    xp: count(v.xp),
+    streak: count(v.streak),
+    completed_lessons: count(v.completed_lessons),
+    certificates: count(v.certificates),
+    weakest_topic: strOrNull(v.weakest_topic, 200),
+    last_active,
+    study_plan: v.study_plan.map((s) => str(s, 300)),
+    thm_path,
+  };
+}
+
 export async function syncToNotion(payload: NotionSyncPayload, env: NotionEnv): Promise<SyncResponse> {
   const token = env.NOTION_TOKEN?.trim();
   const rawDb = env.NOTION_DATABASE_ID?.trim();

@@ -474,7 +474,7 @@ export const mockApi: CareerQuestApi = {
     try {
       const res = await fetch("/api/notion-sync", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-CQ-Sync": "1" },
         body: JSON.stringify({
           user_id: p.user_id,
           display_name: p.display_name,
